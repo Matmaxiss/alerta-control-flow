@@ -47,10 +47,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const savedPasswordReq = localStorage.getItem('requiresPassword');
     
     if (savedAuth) {
-      setAuthState(JSON.parse(savedAuth));
+      const parsedAuth = JSON.parse(savedAuth);
+      // Convert user's createdAt back to Date if it exists
+      if (parsedAuth.user && parsedAuth.user.createdAt) {
+        parsedAuth.user.createdAt = new Date(parsedAuth.user.createdAt);
+      }
+      setAuthState(parsedAuth);
     }
     if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
+      const parsedUsers = JSON.parse(savedUsers);
+      // Convert all users' createdAt back to Date objects
+      const usersWithDates = parsedUsers.map((user: any) => ({
+        ...user,
+        createdAt: new Date(user.createdAt)
+      }));
+      setUsers(usersWithDates);
     }
     if (savedPasswordReq) {
       setAuthState(prev => ({ ...prev, requiresPassword: JSON.parse(savedPasswordReq) }));
