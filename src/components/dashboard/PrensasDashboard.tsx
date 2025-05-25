@@ -71,6 +71,7 @@ const PrensasDashboard: React.FC = () => {
   const getButtonIcon = (alertType: string) => {
     if (alertType === 'Cancel') return Square;
     
+    // Fix: Only check for pressed state for non-Cancel buttons
     const isPressed = pressedButtons[alertType] || activeAlerts.some(alert => 
       alert.type === alertType && alert.userId === user?.id
     );
