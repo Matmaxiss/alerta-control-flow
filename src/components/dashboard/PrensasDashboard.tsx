@@ -103,7 +103,7 @@ const PrensasDashboard: React.FC = () => {
                 <div className="flex flex-col items-center space-y-2">
                   <Icon className="h-8 w-8" />
                   <span className="font-semibold text-lg">{alertType}</span>
-                  {isPressed && alertType !== 'Cancel' && (
+                  {isPressed && (
                     <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
                       ACTIVE
                     </span>
