@@ -19,7 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex items-center">
               <Bell className="h-8 w-8 text-primary mr-3" />
               <h1 className="text-xl font-bold text-foreground">
-                Sistema de Alertas
+                Alert System
               </h1>
             </div>
             
@@ -39,7 +39,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="flex items-center space-x-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <LogOut className="h-4 w-4" />
-                <span>Salir</span>
+                <span>Logout</span>
               </button>
             </div>
           </div>

@@ -8,13 +8,13 @@ const SupervisorDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('alerts');
 
   const tabs = [
-    { id: 'alerts', label: 'Alertas', icon: Activity },
-    { id: 'prensas', label: 'Gestión de Prensas', icon: Settings },
+    { id: 'alerts', label: 'Alerts', icon: Activity },
+    { id: 'prensas', label: 'Press Management', icon: Settings },
   ];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-foreground">Panel de Supervisión</h1>
+      <h1 className="text-3xl font-bold text-foreground">Supervisor Panel</h1>
 
       {/* Tabs */}
       <div className="border-b border-gray-200">

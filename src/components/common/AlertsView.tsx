@@ -21,8 +21,8 @@ const AlertsView: React.FC = () => {
   const handleCancelAlert = (alertId: string) => {
     cancelAlert(alertId);
     toast({
-      title: "Alerta cancelada",
-      description: "La alerta ha sido cancelada exitosamente",
+      title: "Alert cancelled",
+      description: "The alert has been cancelled successfully",
     });
   };
 
@@ -58,7 +58,7 @@ const AlertsView: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-2xl font-semibold text-foreground">
-          Alertas Recientes ({filteredAlerts.length})
+          Recent Alerts ({filteredAlerts.length})
         </h2>
         
         {/* Filters */}
@@ -70,7 +70,7 @@ const AlertsView: React.FC = () => {
               onChange={(e) => setFilterType(e.target.value)}
               className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              <option value="all">Todos los tipos</option>
+              <option value="all">All types</option>
               {ALERT_TYPES.map(type => (
                 <option key={type} value={type}>{type}</option>
               ))}
@@ -82,9 +82,9 @@ const AlertsView: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           >
-            <option value="all">Todos los estados</option>
-            <option value="active">Activas</option>
-            <option value="cancelled">Canceladas</option>
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
       </div>
@@ -94,7 +94,7 @@ const AlertsView: React.FC = () => {
         {filteredAlerts.length === 0 ? (
           <div className="text-center py-12">
             <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">No hay alertas que mostrar</p>
+            <p className="text-gray-500">No alerts to show</p>
           </div>
         ) : (
           filteredAlerts.map((alert) => (
@@ -118,7 +118,7 @@ const AlertsView: React.FC = () => {
                           ? 'bg-red-100 text-red-800' 
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {alert.status === 'active' ? 'Activa' : 'Cancelada'}
+                        {alert.status === 'active' ? 'Active' : 'Cancelled'}
                       </span>
                     </div>
                     
@@ -132,7 +132,7 @@ const AlertsView: React.FC = () => {
                         <span>{alert.timestamp.toLocaleString()}</span>
                       </div>
                       {alert.prensaName && (
-                        <span className="text-gray-500">Prensa: {alert.prensaName}</span>
+                        <span className="text-gray-500">Press: {alert.prensaName}</span>
                       )}
                     </div>
                   </div>
@@ -142,7 +142,7 @@ const AlertsView: React.FC = () => {
                   <button
                     onClick={() => handleCancelAlert(alert.id)}
                     className="flex-shrink-0 p-2 text-gray-400 hover:text-red-600 transition-colors"
-                    title="Cancelar alerta"
+                    title="Cancel alert"
                   >
                     <X className="h-5 w-5" />
                   </button>

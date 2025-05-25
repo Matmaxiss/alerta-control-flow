@@ -17,7 +17,7 @@ const DriverDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-foreground">Panel de Conductor</h1>
+      <h1 className="text-3xl font-bold text-foreground">Driver Panel</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Driver Selection */}
@@ -25,13 +25,13 @@ const DriverDashboard: React.FC = () => {
           <div className="card p-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center">
               <User className="h-5 w-5 mr-2" />
-              Selección de Conductor
+              Driver Selection
             </h2>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Turno
+                  Shift
                 </label>
                 <select
                   value={selectedShift}
@@ -41,7 +41,7 @@ const DriverDashboard: React.FC = () => {
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  <option value="">Seleccionar turno...</option>
+                  <option value="">Select shift...</option>
                   {shifts.map(shift => (
                     <option key={shift} value={shift}>{shift}</option>
                   ))}
@@ -51,14 +51,14 @@ const DriverDashboard: React.FC = () => {
               {selectedShift && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Conductor
+                    Driver
                   </label>
                   <select
                     value={selectedDriver}
                     onChange={(e) => setSelectedDriver(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
-                    <option value="">Seleccionar conductor...</option>
+                    <option value="">Select driver...</option>
                     {driversInShift.map(driver => (
                       <option key={driver.id} value={driver.id}>{driver.username}</option>
                     ))}
@@ -68,12 +68,12 @@ const DriverDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Assigned Prensas */}
+          {/* Assigned Presses */}
           {selectedDriver && (
             <div className="card p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <Truck className="h-5 w-5 mr-2" />
-                Prensas Asignadas
+                Assigned Presses
               </h3>
               
               {assignedPrensas.length > 0 ? (
@@ -86,13 +86,13 @@ const DriverDashboard: React.FC = () => {
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {prensa.status === 'active' ? 'Activa' : 'Inactiva'}
+                        {prensa.status === 'active' ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No hay prensas asignadas</p>
+                <p className="text-gray-500 text-sm">No assigned presses</p>
               )}
             </div>
           )}

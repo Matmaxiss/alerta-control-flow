@@ -11,15 +11,15 @@ const AdminDashboard: React.FC = () => {
   const { togglePasswordRequirement, requiresPassword } = useAuth();
 
   const tabs = [
-    { id: 'alerts', label: 'Alertas', icon: Activity },
-    { id: 'users', label: 'Usuarios', icon: Users },
-    { id: 'prensas', label: 'Prensas', icon: Settings },
+    { id: 'alerts', label: 'Alerts', icon: Activity },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'prensas', label: 'Presses', icon: Settings },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-foreground">Panel de Administración</h1>
+        <h1 className="text-3xl font-bold text-foreground">Admin Panel</h1>
         <div className="flex items-center space-x-4">
           <label className="flex items-center space-x-2">
             <input
@@ -28,7 +28,7 @@ const AdminDashboard: React.FC = () => {
               onChange={togglePasswordRequirement}
               className="rounded border-gray-300 text-primary focus:ring-primary"
             />
-            <span className="text-sm text-gray-600">Requerir contraseña para usuarios</span>
+            <span className="text-sm text-gray-600">Require password for users</span>
           </label>
         </div>
       </div>

@@ -16,7 +16,7 @@ const LoginForm: React.FC = () => {
     if (!username.trim()) {
       toast({
         title: "Error",
-        description: "Por favor ingrese un nombre de usuario",
+        description: "Please enter a username",
         variant: "destructive",
       });
       return;
@@ -27,7 +27,7 @@ const LoginForm: React.FC = () => {
     if (!user) {
       toast({
         title: "Error",
-        description: "Usuario no encontrado o inactivo",
+        description: "User not found or inactive",
         variant: "destructive",
       });
       return;
@@ -37,13 +37,13 @@ const LoginForm: React.FC = () => {
     
     if (success) {
       toast({
-        title: "Éxito",
-        description: "Inicio de sesión exitoso",
+        title: "Success",
+        description: "Login successful",
       });
     } else {
       toast({
         title: "Error",
-        description: "Credenciales incorrectas",
+        description: "Incorrect credentials",
         variant: "destructive",
       });
     }
@@ -62,10 +62,10 @@ const LoginForm: React.FC = () => {
             <User className="h-6 w-6 text-white" />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Sistema de Alertas
+            Alert System
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Ingrese sus credenciales para acceder
+            Enter your credentials to access
           </p>
         </div>
         
@@ -73,7 +73,7 @@ const LoginForm: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Usuario
+                Username
               </label>
               <div className="mt-1 relative">
                 <input
@@ -84,7 +84,7 @@ const LoginForm: React.FC = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                  placeholder="Nombre de usuario"
+                  placeholder="Username"
                 />
                 <User className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
               </div>
@@ -93,7 +93,7 @@ const LoginForm: React.FC = () => {
             {needsPassword(username) && (
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Contraseña
+                  Password
                 </label>
                 <div className="mt-1 relative">
                   <input
@@ -104,7 +104,7 @@ const LoginForm: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="appearance-none relative block w-full px-3 py-2 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                    placeholder="Contraseña"
+                    placeholder="Password"
                   />
                   <Lock className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
                   <button
@@ -124,7 +124,7 @@ const LoginForm: React.FC = () => {
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
             >
-              Iniciar Sesión
+              Login
             </button>
           </div>
         </form>
