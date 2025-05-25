@@ -36,7 +36,7 @@ const PrensaManagement: React.FC = () => {
     if (!prensaForm.name.trim()) {
       toast({
         title: "Error",
-        description: "El nombre de la prensa es requerido",
+        description: "Press name is required",
         variant: "destructive",
       });
       return;
@@ -51,14 +51,14 @@ const PrensaManagement: React.FC = () => {
     if (editingPrensa) {
       updatePrensa(editingPrensa, formData);
       toast({
-        title: "Éxito",
-        description: "Prensa actualizada correctamente",
+        title: "Success",
+        description: "Press updated successfully",
       });
     } else {
       addPrensa(formData);
       toast({
-        title: "Éxito",
-        description: "Prensa creada correctamente",
+        title: "Success",
+        description: "Press created successfully",
       });
     }
 
@@ -73,7 +73,7 @@ const PrensaManagement: React.FC = () => {
     if (!blockForm.name.trim()) {
       toast({
         title: "Error",
-        description: "El nombre del bloque es requerido",
+        description: "Block name is required",
         variant: "destructive",
       });
       return;
@@ -82,7 +82,7 @@ const PrensaManagement: React.FC = () => {
     if (blockForm.prensaIds.length === 0) {
       toast({
         title: "Error",
-        description: "Debe seleccionar al menos una prensa",
+        description: "Must select at least one press",
         variant: "destructive",
       });
       return;
@@ -97,14 +97,14 @@ const PrensaManagement: React.FC = () => {
     if (editingBlock) {
       updatePrensaBlock(editingBlock, formData);
       toast({
-        title: "Éxito",
-        description: "Bloque actualizado correctamente",
+        title: "Success",
+        description: "Block updated successfully",
       });
     } else {
       addPrensaBlock(formData);
       toast({
-        title: "Éxito",
-        description: "Bloque creado correctamente",
+        title: "Success",
+        description: "Block created successfully",
       });
     }
 
@@ -135,21 +135,21 @@ const PrensaManagement: React.FC = () => {
   };
 
   const handleDeletePrensa = (prensaId: string) => {
-    if (confirm('¿Está seguro de que desea eliminar esta prensa?')) {
+    if (confirm('Are you sure you want to delete this press?')) {
       deletePrensa(prensaId);
       toast({
-        title: "Éxito",
-        description: "Prensa eliminada correctamente",
+        title: "Success",
+        description: "Press deleted successfully",
       });
     }
   };
 
   const handleDeleteBlock = (blockId: string) => {
-    if (confirm('¿Está seguro de que desea eliminar este bloque?')) {
+    if (confirm('Are you sure you want to delete this block?')) {
       deletePrensaBlock(blockId);
       toast({
-        title: "Éxito",
-        description: "Bloque eliminado correctamente",
+        title: "Success",
+        description: "Block deleted successfully",
       });
     }
   };
@@ -166,7 +166,7 @@ const PrensaManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-foreground">Gestión de Prensas</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Press Management</h2>
       </div>
 
       {/* Tabs */}
@@ -181,7 +181,7 @@ const PrensaManagement: React.FC = () => {
             } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
           >
             <Settings className="h-4 w-4" />
-            <span>Prensas Individuales</span>
+            <span>Individual Presses</span>
           </button>
           <button
             onClick={() => setActiveTab('blocks')}
@@ -192,7 +192,7 @@ const PrensaManagement: React.FC = () => {
             } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
           >
             <Package className="h-4 w-4" />
-            <span>Bloques de Prensas</span>
+            <span>Press Blocks</span>
           </button>
         </nav>
       </div>
@@ -210,7 +210,7 @@ const PrensaManagement: React.FC = () => {
               className="btn-primary flex items-center space-x-2"
             >
               <Plus className="h-4 w-4" />
-              <span>Nueva Prensa</span>
+              <span>New Press</span>
             </button>
           </div>
 
@@ -218,13 +218,13 @@ const PrensaManagement: React.FC = () => {
           {showPrensaForm && (
             <div className="card p-6">
               <h3 className="text-lg font-semibold mb-4">
-                {editingPrensa ? 'Editar Prensa' : 'Nueva Prensa'}
+                {editingPrensa ? 'Edit Press' : 'New Press'}
               </h3>
               
               <form onSubmit={handlePrensaSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre de la Prensa
+                    Press Name
                   </label>
                   <input
                     type="text"
@@ -237,7 +237,7 @@ const PrensaManagement: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Turno
+                    Shift
                   </label>
                   <select
                     value={prensaForm.shift}
@@ -252,14 +252,14 @@ const PrensaManagement: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Conductor Asignado
+                    Assigned Driver
                   </label>
                   <select
                     value={prensaForm.assignedToDriver}
                     onChange={(e) => setPrensaForm(prev => ({ ...prev, assignedToDriver: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
-                    <option value="">Sin asignar</option>
+                    <option value="">Unassigned</option>
                     {drivers.filter(d => d.shift === prensaForm.shift).map(driver => (
                       <option key={driver.id} value={driver.id}>{driver.username}</option>
                     ))}
@@ -268,21 +268,21 @@ const PrensaManagement: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Estado
+                    Status
                   </label>
                   <select
                     value={prensaForm.status}
                     onChange={(e) => setPrensaForm(prev => ({ ...prev, status: e.target.value as any }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
-                    <option value="active">Activa</option>
-                    <option value="inactive">Inactiva</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                   </select>
                 </div>
 
                 <div className="md:col-span-2 flex space-x-4">
                   <button type="submit" className="btn-primary">
-                    {editingPrensa ? 'Actualizar' : 'Crear'} Prensa
+                    {editingPrensa ? 'Update' : 'Create'} Press
                   </button>
                   <button
                     type="button"
@@ -292,7 +292,7 @@ const PrensaManagement: React.FC = () => {
                     }}
                     className="btn-secondary"
                   >
-                    Cancelar
+                    Cancel
                   </button>
                 </div>
               </form>
@@ -309,14 +309,14 @@ const PrensaManagement: React.FC = () => {
                     <button
                       onClick={() => handleEditPrensa(prensa)}
                       className="text-primary hover:text-primary/80 p-1"
-                      title="Editar prensa"
+                      title="Edit press"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDeletePrensa(prensa.id)}
                       className="text-red-600 hover:text-red-800 p-1"
-                      title="Eliminar prensa"
+                      title="Delete press"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -325,22 +325,22 @@ const PrensaManagement: React.FC = () => {
                 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Estado:</span>
+                    <span className="text-gray-600">Status:</span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       prensa.status === 'active' 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {prensa.status === 'active' ? 'Activa' : 'Inactiva'}
+                      {prensa.status === 'active' ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Turno:</span>
+                    <span className="text-gray-600">Shift:</span>
                     <span>{prensa.shift}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Conductor:</span>
-                    <span>{prensa.assignedToDriverName || 'Sin asignar'}</span>
+                    <span className="text-gray-600">Driver:</span>
+                    <span>{prensa.assignedToDriverName || 'Unassigned'}</span>
                   </div>
                 </div>
               </div>
@@ -362,7 +362,7 @@ const PrensaManagement: React.FC = () => {
               className="btn-primary flex items-center space-x-2"
             >
               <Plus className="h-4 w-4" />
-              <span>Nuevo Bloque</span>
+              <span>New Block</span>
             </button>
           </div>
 
@@ -370,14 +370,14 @@ const PrensaManagement: React.FC = () => {
           {showBlockForm && (
             <div className="card p-6">
               <h3 className="text-lg font-semibold mb-4">
-                {editingBlock ? 'Editar Bloque' : 'Nuevo Bloque'}
+                {editingBlock ? 'Edit Block' : 'New Block'}
               </h3>
               
               <form onSubmit={handleBlockSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre del Bloque
+                      Block Name
                     </label>
                     <input
                       type="text"
@@ -390,14 +390,14 @@ const PrensaManagement: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Conductor Asignado
+                      Assigned Driver
                     </label>
                     <select
                       value={blockForm.assignedToDriver}
                       onChange={(e) => setBlockForm(prev => ({ ...prev, assignedToDriver: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
-                      <option value="">Sin asignar</option>
+                      <option value="">Unassigned</option>
                       {drivers.map(driver => (
                         <option key={driver.id} value={driver.id}>{driver.username}</option>
                       ))}
@@ -407,7 +407,7 @@ const PrensaManagement: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Prensas en el Bloque
+                    Presses in Block
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-60 overflow-y-auto border border-gray-300 rounded-md p-3">
                     {prensas.map(prensa => (
@@ -426,7 +426,7 @@ const PrensaManagement: React.FC = () => {
 
                 <div className="flex space-x-4">
                   <button type="submit" className="btn-primary">
-                    {editingBlock ? 'Actualizar' : 'Crear'} Bloque
+                    {editingBlock ? 'Update' : 'Create'} Block
                   </button>
                   <button
                     type="button"
@@ -436,7 +436,7 @@ const PrensaManagement: React.FC = () => {
                     }}
                     className="btn-secondary"
                   >
-                    Cancelar
+                    Cancel
                   </button>
                 </div>
               </form>
@@ -453,14 +453,14 @@ const PrensaManagement: React.FC = () => {
                     <button
                       onClick={() => handleEditBlock(block)}
                       className="text-primary hover:text-primary/80 p-1"
-                      title="Editar bloque"
+                      title="Edit block"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteBlock(block.id)}
                       className="text-red-600 hover:text-red-800 p-1"
-                      title="Eliminar bloque"
+                      title="Delete block"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -469,13 +469,13 @@ const PrensaManagement: React.FC = () => {
                 
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Conductor:</span>
-                    <span>{block.assignedToDriverName || 'Sin asignar'}</span>
+                    <span className="text-gray-600">Driver:</span>
+                    <span>{block.assignedToDriverName || 'Unassigned'}</span>
                   </div>
                   
                   <div>
                     <span className="text-sm text-gray-600 block mb-2">
-                      Prensas ({block.prensaIds.length}):
+                      Presses ({block.prensaIds.length}):
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {block.prensaIds.map(prensaId => {

@@ -23,7 +23,7 @@ const UserManagement: React.FC = () => {
     if (!formData.username.trim()) {
       toast({
         title: "Error",
-        description: "El nombre de usuario es requerido",
+        description: "Username is required",
         variant: "destructive",
       });
       return;
@@ -37,7 +37,7 @@ const UserManagement: React.FC = () => {
     if (existingUser) {
       toast({
         title: "Error",
-        description: "Ya existe un usuario con ese nombre",
+        description: "A user with that name already exists",
         variant: "destructive",
       });
       return;
@@ -46,14 +46,14 @@ const UserManagement: React.FC = () => {
     if (editingUser) {
       updateUser(editingUser, formData);
       toast({
-        title: "Éxito",
-        description: "Usuario actualizado correctamente",
+        title: "Success",
+        description: "User updated successfully",
       });
     } else {
       addUser(formData);
       toast({
-        title: "Éxito",
-        description: "Usuario creado correctamente",
+        title: "Success",
+        description: "User created successfully",
       });
     }
 
@@ -84,17 +84,17 @@ const UserManagement: React.FC = () => {
     if (userId === '1') {
       toast({
         title: "Error",
-        description: "No se puede eliminar el usuario administrador",
+        description: "Cannot delete the administrator user",
         variant: "destructive",
       });
       return;
     }
 
-    if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
+    if (confirm('Are you sure you want to delete this user?')) {
       deleteUser(userId);
       toast({
-        title: "Éxito",
-        description: "Usuario eliminado correctamente",
+        title: "Success",
+        description: "User deleted successfully",
       });
     }
   };
@@ -103,7 +103,7 @@ const UserManagement: React.FC = () => {
     if (userId === '1') {
       toast({
         title: "Error",
-        description: "No se puede desactivar el usuario administrador",
+        description: "Cannot deactivate the administrator user",
         variant: "destructive",
       });
       return;
@@ -111,15 +111,15 @@ const UserManagement: React.FC = () => {
 
     updateUser(userId, { active: !currentStatus });
     toast({
-      title: "Éxito",
-      description: `Usuario ${!currentStatus ? 'activado' : 'desactivado'} correctamente`,
+      title: "Success",
+      description: `User ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
     });
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-foreground">Gestión de Usuarios</h2>
+        <h2 className="text-2xl font-semibold text-foreground">User Management</h2>
         <button
           onClick={() => {
             setShowForm(true);
@@ -135,7 +135,7 @@ const UserManagement: React.FC = () => {
           className="btn-primary flex items-center space-x-2"
         >
           <Plus className="h-4 w-4" />
-          <span>Nuevo Usuario</span>
+          <span>New User</span>
         </button>
       </div>
 
@@ -143,13 +143,13 @@ const UserManagement: React.FC = () => {
       {showForm && (
         <div className="card p-6">
           <h3 className="text-lg font-semibold mb-4">
-            {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+            {editingUser ? 'Edit User' : 'New User'}
           </h3>
           
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre de Usuario
+                Username
               </label>
               <input
                 type="text"
@@ -162,7 +162,7 @@ const UserManagement: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rol
+                Role
               </label>
               <select
                 value={formData.role}
@@ -179,7 +179,7 @@ const UserManagement: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Turno
+                Shift
               </label>
               <select
                 value={formData.shift}
@@ -200,7 +200,7 @@ const UserManagement: React.FC = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
                   className="rounded border-gray-300 text-primary focus:ring-primary"
                 />
-                <span className="text-sm text-gray-700">Usuario activo</span>
+                <span className="text-sm text-gray-700">Active user</span>
               </label>
 
               <label className="flex items-center space-x-2">
@@ -210,13 +210,13 @@ const UserManagement: React.FC = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, requiresPassword: e.target.checked }))}
                   className="rounded border-gray-300 text-primary focus:ring-primary"
                 />
-                <span className="text-sm text-gray-700">Requiere contraseña</span>
+                <span className="text-sm text-gray-700">Requires password</span>
               </label>
             </div>
 
             <div className="md:col-span-2 flex space-x-4">
               <button type="submit" className="btn-primary">
-                {editingUser ? 'Actualizar' : 'Crear'} Usuario
+                {editingUser ? 'Update' : 'Create'} User
               </button>
               <button
                 type="button"
@@ -226,7 +226,7 @@ const UserManagement: React.FC = () => {
                 }}
                 className="btn-secondary"
               >
-                Cancelar
+                Cancel
               </button>
             </div>
           </form>
@@ -240,22 +240,22 @@ const UserManagement: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Usuario
+                  User
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol
+                  Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Turno
+                  Shift
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
+                  Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fecha Creación
+                  Created Date
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -270,7 +270,7 @@ const UserManagement: React.FC = () => {
                           {user.username}
                         </div>
                         {user.requiresPassword && (
-                          <div className="text-xs text-gray-500">Requiere contraseña</div>
+                          <div className="text-xs text-gray-500">Requires password</div>
                         )}
                       </div>
                     </div>
@@ -295,12 +295,12 @@ const UserManagement: React.FC = () => {
                       {user.active ? (
                         <>
                           <UserCheck className="h-3 w-3 mr-1" />
-                          Activo
+                          Active
                         </>
                       ) : (
                         <>
                           <UserX className="h-3 w-3 mr-1" />
-                          Inactivo
+                          Inactive
                         </>
                       )}
                     </button>
@@ -313,7 +313,7 @@ const UserManagement: React.FC = () => {
                       <button
                         onClick={() => handleEdit(user)}
                         className="text-primary hover:text-primary/80 p-1"
-                        title="Editar usuario"
+                        title="Edit user"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
@@ -321,7 +321,7 @@ const UserManagement: React.FC = () => {
                         <button
                           onClick={() => handleDelete(user.id)}
                           className="text-red-600 hover:text-red-800 p-1"
-                          title="Eliminar usuario"
+                          title="Delete user"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
