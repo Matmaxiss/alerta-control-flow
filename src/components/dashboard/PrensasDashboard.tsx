@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
@@ -8,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 
 const PrensasDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { addAlert, alerts, prensas } = useData();
+  const { addAlert, alerts, cancelAlert } = useData();
   const [pressedButtons, setPressedButtons] = useState<{ [key: string]: boolean }>({});
 
   // Get the press info if user is a press type
@@ -22,10 +21,11 @@ const PrensasDashboard: React.FC = () => {
     if (alertType === 'Cancel') {
       // Cancel all active alerts for this user
       activeAlerts.forEach(alert => {
-        if (alert.userId === user?.id) {
-          setPressedButtons(prev => ({ ...prev, [alert.type]: false }));
-        }
+        cancelAlert(alert.id);
       });
+      
+      // Reset all pressed buttons to green
+      setPressedButtons({});
       
       addAlert({
         type: 'Cancel',
@@ -38,8 +38,8 @@ const PrensasDashboard: React.FC = () => {
       });
 
       toast({
-        title: "Alerts cancelled",
-        description: "All active alerts have been cancelled",
+        title: "Alertas canceladas",
+        description: "Todas las alertas activas han sido canceladas",
       });
     } else {
       setPressedButtons(prev => ({ ...prev, [alertType]: true }));
@@ -55,8 +55,8 @@ const PrensasDashboard: React.FC = () => {
       });
 
       toast({
-        title: "Alert created",
-        description: `Alert of type ${alertType} has been sent from ${userPress?.name || 'press'}`,
+        title: "Alerta creada",
+        description: `Alerta de tipo ${alertType} ha sido enviada desde ${userPress?.name || 'prensa'}`,
       });
     }
   };
@@ -88,7 +88,7 @@ const PrensasDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Press Panel</h1>
+        <h1 className="text-3xl font-bold text-foreground">Panel de Prensa</h1>
         {userPress && (
           <div className="flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-lg">
             <Settings className="h-5 w-5 text-blue-600" />
@@ -100,36 +100,36 @@ const PrensasDashboard: React.FC = () => {
       
       {userPress && (
         <div className="card p-4 bg-blue-50 border-blue-200">
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">Press Information</h3>
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">Información de la Prensa</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <span className="text-blue-600 font-medium">Press:</span>
+              <span className="text-blue-600 font-medium">Prensa:</span>
               <div className="text-blue-900">{userPress.name}</div>
             </div>
             <div>
-              <span className="text-blue-600 font-medium">Shift:</span>
+              <span className="text-blue-600 font-medium">Turno:</span>
               <div className="text-blue-900">{userPress.shift}</div>
             </div>
             <div>
-              <span className="text-blue-600 font-medium">Status:</span>
+              <span className="text-blue-600 font-medium">Estado:</span>
               <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
                 userPress.status === 'active' 
                   ? 'bg-green-100 text-green-800' 
                   : 'bg-gray-100 text-gray-800'
               }`}>
-                {userPress.status === 'active' ? 'Active' : 'Inactive'}
+                {userPress.status === 'active' ? 'Activa' : 'Inactiva'}
               </div>
             </div>
             <div>
-              <span className="text-blue-600 font-medium">Driver:</span>
-              <div className="text-blue-900">{userPress.assignedToDriverName || 'Unassigned'}</div>
+              <span className="text-blue-600 font-medium">Conductor:</span>
+              <div className="text-blue-900">{userPress.assignedToDriverName || 'Sin asignar'}</div>
             </div>
           </div>
         </div>
       )}
       
       <div className="card p-6">
-        <h2 className="text-xl font-semibold mb-6">Alert Buttons</h2>
+        <h2 className="text-xl font-semibold mb-6">Botones de Alerta</h2>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {ALERT_TYPES.map((alertType) => {
@@ -151,7 +151,7 @@ const PrensasDashboard: React.FC = () => {
                   <span className="font-semibold text-lg">{alertType}</span>
                   {isPressed && (
                     <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                      ACTIVE
+                      ACTIVO
                     </span>
                   )}
                 </div>
@@ -164,7 +164,7 @@ const PrensasDashboard: React.FC = () => {
       {/* Active Alerts */}
       {activeAlerts.length > 0 && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold mb-4">My Active Alerts</h3>
+          <h3 className="text-lg font-semibold mb-4">Mis Alertas Activas</h3>
           <div className="space-y-2">
             {activeAlerts.map(alert => (
               <div key={alert.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -183,7 +183,7 @@ const PrensasDashboard: React.FC = () => {
                   </div>
                 </div>
                 <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                  Active
+                  Activa
                 </span>
               </div>
             ))}
