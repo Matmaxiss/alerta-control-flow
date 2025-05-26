@@ -42,7 +42,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const savedPrensas = localStorage.getItem('prensas');
     const savedBlocks = localStorage.getItem('prensaBlocks');
     
-    if (savedAlerts) setAlerts(JSON.parse(savedAlerts));
+    if (savedAlerts) {
+      const parsedAlerts = JSON.parse(savedAlerts);
+      // Convert timestamp strings back to Date objects
+      const alertsWithDates = parsedAlerts.map((alert: any) => ({
+        ...alert,
+        timestamp: new Date(alert.timestamp)
+      }));
+      setAlerts(alertsWithDates);
+    }
     if (savedPrensas) setPrensas(JSON.parse(savedPrensas));
     if (savedBlocks) setPrensaBlocks(JSON.parse(savedBlocks));
   }, []);
