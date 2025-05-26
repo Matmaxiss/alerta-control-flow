@@ -2,11 +2,12 @@
 export interface User {
   id: string;
   username: string;
-  role: 'admin' | 'supervisor' | 'technical' | 'driver' | 'prensas';
+  role: 'admin' | 'supervisor' | 'technical' | 'driver' | 'prensas' | 'press';
   shift: string;
   createdAt: Date;
   active: boolean;
   requiresPassword?: boolean;
+  prensaId?: string; // Link to the press this user represents
 }
 
 export interface Alert {
@@ -28,6 +29,7 @@ export interface Prensa {
   assignedToDriverName?: string;
   status: 'active' | 'inactive';
   shift: string;
+  userId?: string; // Link to the user account for this press
 }
 
 export interface PrensaBlock {
@@ -44,6 +46,6 @@ export interface AuthState {
   requiresPassword: boolean;
 }
 
-export const ROLES = ['admin', 'supervisor', 'technical', 'driver', 'prensas'] as const;
+export const ROLES = ['admin', 'supervisor', 'technical', 'driver', 'prensas', 'press'] as const;
 export const SHIFTS = ['1 shift', '2 shift', '3 shift', '4 shift'] as const;
 export const ALERT_TYPES = ['Driver', 'Technical', 'Supervisor', 'Cancel'] as const;

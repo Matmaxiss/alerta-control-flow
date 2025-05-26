@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Alert, Prensa, PrensaBlock } from '../types';
+import { useAuth } from './AuthContext';
 
 interface DataContextType {
   alerts: Alert[];
@@ -29,10 +30,10 @@ export const useData = () => {
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [prensas, setPrensas] = useState<Prensa[]>([
-    { id: '1', name: 'Prensa 1', status: 'active', shift: '1 shift' },
-    { id: '2', name: 'Prensa 2', status: 'active', shift: '1 shift' },
-    { id: '3', name: 'Prensa 3', status: 'active', shift: '2 shift' },
-    { id: '4', name: 'Prensa 4', status: 'active', shift: '2 shift' },
+    { id: '1', name: 'Press 1', status: 'active', shift: '1 shift' },
+    { id: '2', name: 'Press 2', status: 'active', shift: '1 shift' },
+    { id: '3', name: 'Press 3', status: 'active', shift: '2 shift' },
+    { id: '4', name: 'Press 4', status: 'active', shift: '2 shift' },
   ]);
   const [prensaBlocks, setPrensaBlocks] = useState<PrensaBlock[]>([]);
 

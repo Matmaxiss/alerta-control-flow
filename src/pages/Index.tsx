@@ -27,6 +27,7 @@ const AppContent: React.FC = () => {
       case 'driver':
         return <DriverDashboard />;
       case 'prensas':
+      case 'press':
         return <PrensasDashboard />;
       case 'technical':
         return <AlertsView />;

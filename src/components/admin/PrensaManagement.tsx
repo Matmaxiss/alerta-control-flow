@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 
 const PrensaManagement: React.FC = () => {
   const { prensas, prensaBlocks, addPrensa, updatePrensa, deletePrensa, addPrensaBlock, updatePrensaBlock, deletePrensaBlock } = useData();
-  const { users } = useAuth();
+  const { users, addUser, updateUser, deleteUser } = useAuth();
   const [activeTab, setActiveTab] = useState('individual');
   const [showPrensaForm, setShowPrensaForm] = useState(false);
   const [showBlockForm, setShowBlockForm] = useState(false);
@@ -50,15 +49,37 @@ const PrensaManagement: React.FC = () => {
 
     if (editingPrensa) {
       updatePrensa(editingPrensa, formData);
+      
+      // Update the corresponding user
+      const existingUser = users.find(u => u.prensaId === editingPrensa);
+      if (existingUser) {
+        updateUser(existingUser.id, {
+          username: prensaForm.name,
+          shift: prensaForm.shift,
+          active: prensaForm.status === 'active'
+        });
+      }
+      
       toast({
         title: "Success",
         description: "Press updated successfully",
       });
     } else {
-      addPrensa(formData);
+      const newPrensa = addPrensa(formData);
+      
+      // Create a user account for this press
+      addUser({
+        username: prensaForm.name,
+        role: 'press',
+        shift: prensaForm.shift,
+        active: prensaForm.status === 'active',
+        requiresPassword: false,
+        prensaId: Date.now().toString() // This will be the same ID as the prensa
+      });
+      
       toast({
         title: "Success",
-        description: "Press created successfully",
+        description: "Press created successfully with user account",
       });
     }
 
@@ -135,11 +156,17 @@ const PrensaManagement: React.FC = () => {
   };
 
   const handleDeletePrensa = (prensaId: string) => {
-    if (confirm('Are you sure you want to delete this press?')) {
+    if (confirm('Are you sure you want to delete this press? This will also delete the associated user account.')) {
+      // Delete the corresponding user
+      const associatedUser = users.find(u => u.prensaId === prensaId);
+      if (associatedUser) {
+        deleteUser(associatedUser.id);
+      }
+      
       deletePrensa(prensaId);
       toast({
         title: "Success",
-        description: "Press deleted successfully",
+        description: "Press and associated user deleted successfully",
       });
     }
   };
@@ -301,50 +328,63 @@ const PrensaManagement: React.FC = () => {
 
           {/* Prensas Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {prensas.map((prensa) => (
-              <div key={prensa.id} className="card p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-lg">{prensa.name}</h3>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEditPrensa(prensa)}
-                      className="text-primary hover:text-primary/80 p-1"
-                      title="Edit press"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePrensa(prensa.id)}
-                      className="text-red-600 hover:text-red-800 p-1"
-                      title="Delete press"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+            {prensas.map((prensa) => {
+              const associatedUser = users.find(u => u.prensaId === prensa.id);
+              return (
+                <div key={prensa.id} className="card p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-lg">{prensa.name}</h3>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditPrensa(prensa)}
+                        className="text-primary hover:text-primary/80 p-1"
+                        title="Edit press"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePrensa(prensa.id)}
+                        className="text-red-600 hover:text-red-800 p-1"
+                        title="Delete press"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status:</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        prensa.status === 'active' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {prensa.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Shift:</span>
+                      <span>{prensa.shift}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Driver:</span>
+                      <span>{prensa.assignedToDriverName || 'Unassigned'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">User Account:</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        associatedUser 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {associatedUser ? 'Created' : 'None'}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      prensa.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {prensa.status === 'active' ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shift:</span>
-                    <span>{prensa.shift}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Driver:</span>
-                    <span>{prensa.assignedToDriverName || 'Unassigned'}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
