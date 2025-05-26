@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthProvider } from '../contexts/AuthContext';
@@ -26,7 +25,6 @@ const AppContent: React.FC = () => {
         return <SupervisorDashboard />;
       case 'driver':
         return <DriverDashboard />;
-      case 'prensas':
       case 'press':
         return <PrensasDashboard />;
       case 'technical':

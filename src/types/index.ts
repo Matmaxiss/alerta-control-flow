@@ -1,8 +1,7 @@
-
 export interface User {
   id: string;
   username: string;
-  role: 'admin' | 'supervisor' | 'technical' | 'driver' | 'prensas' | 'press';
+  role: 'admin' | 'supervisor' | 'technical' | 'driver' | 'press';
   shift: string;
   createdAt: Date;
   active: boolean;
@@ -46,6 +45,6 @@ export interface AuthState {
   requiresPassword: boolean;
 }
 
-export const ROLES = ['admin', 'supervisor', 'technical', 'driver', 'prensas', 'press'] as const;
+export const ROLES = ['admin', 'supervisor', 'technical', 'driver', 'press'] as const;
 export const SHIFTS = ['1 shift', '2 shift', '3 shift', '4 shift'] as const;
 export const ALERT_TYPES = ['Driver', 'Technical', 'Supervisor', 'Cancel'] as const;
