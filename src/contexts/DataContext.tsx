@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Alert, Prensa, PrensaBlock } from '../types';
 import { useAuth } from './AuthContext';
@@ -8,6 +7,7 @@ interface AlertButton {
   name: string;
   image?: string;
   color: string;
+  allowedRoles: string[];
 }
 
 interface DataContextType {
@@ -48,12 +48,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ]);
   const [prensaBlocks, setPrensaBlocks] = useState<PrensaBlock[]>([]);
   const [alertButtons, setAlertButtons] = useState<AlertButton[]>([
-    { id: '1', name: 'Mechanical', color: '#ef4444' },
-    { id: '2', name: 'Electrical', color: '#f97316' },
-    { id: '3', name: 'Quality', color: '#eab308' },
-    { id: '4', name: 'Material', color: '#22c55e' },
-    { id: '5', name: 'Other', color: '#6366f1' },
-    { id: '6', name: 'Cancel', color: '#eab308' },
+    { id: '1', name: 'Mechanical', color: '#ef4444', allowedRoles: ['admin', 'supervisor', 'press'] },
+    { id: '2', name: 'Electrical', color: '#f97316', allowedRoles: ['admin', 'supervisor', 'press'] },
+    { id: '3', name: 'Quality', color: '#eab308', allowedRoles: ['admin', 'supervisor', 'press'] },
+    { id: '4', name: 'Material', color: '#22c55e', allowedRoles: ['admin', 'supervisor', 'driver'] },
+    { id: '5', name: 'Other', color: '#6366f1', allowedRoles: ['admin', 'supervisor', 'press', 'driver'] },
+    { id: '6', name: 'Cancel', color: '#eab308', allowedRoles: ['admin', 'supervisor', 'press', 'driver'] },
   ]);
 
   useEffect(() => {

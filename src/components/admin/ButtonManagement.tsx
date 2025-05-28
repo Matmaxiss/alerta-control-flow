@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, Image, Save, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { ROLES } from '../../types';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ interface AlertButton {
   name: string;
   image?: string;
   color: string;
+  allowedRoles: string[];
 }
 
 const ButtonManagement: React.FC = () => {
@@ -36,7 +38,8 @@ const ButtonManagement: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     image: '',
-    color: '#ef4444'
+    color: '#ef4444',
+    allowedRoles: ['press'] as string[]
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -51,11 +54,21 @@ const ButtonManagement: React.FC = () => {
       return;
     }
 
+    if (formData.allowedRoles.length === 0) {
+      toast({
+        title: "Error",
+        description: "Debe seleccionar al menos un rol",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (editingButton) {
       updateAlertButton(editingButton.id, {
         name: formData.name,
         image: formData.image,
-        color: formData.color
+        color: formData.color,
+        allowedRoles: formData.allowedRoles
       });
       toast({
         title: "Botón actualizado",
@@ -65,7 +78,8 @@ const ButtonManagement: React.FC = () => {
       addAlertButton({
         name: formData.name,
         image: formData.image,
-        color: formData.color
+        color: formData.color,
+        allowedRoles: formData.allowedRoles
       });
       toast({
         title: "Botón creado",
@@ -81,7 +95,8 @@ const ButtonManagement: React.FC = () => {
     setFormData({
       name: '',
       image: '',
-      color: '#ef4444'
+      color: '#ef4444',
+      allowedRoles: ['press']
     });
     setEditingButton(null);
   };
@@ -91,7 +106,8 @@ const ButtonManagement: React.FC = () => {
     setFormData({
       name: button.name,
       image: button.image || '',
-      color: button.color
+      color: button.color,
+      allowedRoles: button.allowedRoles || ['press']
     });
     setIsDialogOpen(true);
   };
@@ -118,6 +134,15 @@ const ButtonManagement: React.FC = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRoleToggle = (role: string) => {
+    setFormData(prev => ({
+      ...prev,
+      allowedRoles: prev.allowedRoles.includes(role)
+        ? prev.allowedRoles.filter(r => r !== role)
+        : [...prev.allowedRoles, role]
+    }));
   };
 
   return (
@@ -165,6 +190,24 @@ const ButtonManagement: React.FC = () => {
                     placeholder="#ef4444"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Roles Permitidos</Label>
+                <div className="space-y-2">
+                  {ROLES.map(role => (
+                    <label key={role} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={formData.allowedRoles.includes(role)}
+                        onChange={() => handleRoleToggle(role)}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm capitalize">{role}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500">Admin y Supervisor siempre ven todos los botones</p>
               </div>
 
               <div className="space-y-2">
@@ -221,13 +264,14 @@ const ButtonManagement: React.FC = () => {
               <TableHead>Imagen</TableHead>
               <TableHead>Nombre</TableHead>
               <TableHead>Color</TableHead>
+              <TableHead>Roles</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {alertButtons.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500 py-8">
+                <TableCell colSpan={5} className="text-center text-gray-500 py-8">
                   No hay botones configurados
                 </TableCell>
               </TableRow>
@@ -255,6 +299,15 @@ const ButtonManagement: React.FC = () => {
                         style={{ backgroundColor: button.color }}
                       />
                       <span className="text-sm text-gray-600">{button.color}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {(button.allowedRoles || []).map(role => (
+                        <span key={role} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded capitalize">
+                          {role}
+                        </span>
+                      ))}
                     </div>
                   </TableCell>
                   <TableCell>

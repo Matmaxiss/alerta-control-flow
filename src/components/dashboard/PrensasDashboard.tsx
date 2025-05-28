@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
@@ -17,6 +15,14 @@ const PrensasDashboard: React.FC = () => {
   const activeAlerts = alerts.filter(alert => 
     alert.status === 'active' && alert.userId === user?.id
   );
+
+  // Filter buttons based on user role - admin and supervisor see all buttons
+  const visibleButtons = alertButtons.filter(button => {
+    if (user?.role === 'admin' || user?.role === 'supervisor') {
+      return true; // Admin and supervisor see all buttons
+    }
+    return button.allowedRoles?.includes(user?.role || '') || false;
+  });
 
   const handleButtonPress = (buttonName: string) => {
     if (buttonName === 'Cancel') {
@@ -46,7 +52,7 @@ const PrensasDashboard: React.FC = () => {
       setPressedButtons(prev => ({ ...prev, [buttonName]: true }));
       
       addAlert({
-        type: buttonName as any,
+        type: buttonName,
         userId: user?.id || '',
         username: user?.username || '',
         status: 'active',
@@ -137,7 +143,7 @@ const PrensasDashboard: React.FC = () => {
         <h2 className="text-xl font-semibold mb-6">Botones de Alerta</h2>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {alertButtons.map((button) => {
+          {visibleButtons.map((button) => {
             const Icon = getButtonIcon(button);
             const isPressed = button.name !== 'Cancel' && (
               pressedButtons[button.name] || activeAlerts.some(alert => 
