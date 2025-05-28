@@ -1,13 +1,15 @@
 
 import React, { useState } from 'react';
 import { useData } from '../../contexts/DataContext';
-import { Play, Square, AlertTriangle, Settings } from 'lucide-react';
+import { Play, Square, AlertTriangle, Settings, Home } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const PrensaDashboard: React.FC = () => {
   const { addAlert, alerts, cancelAlert, prensas, alertButtons } = useData();
   const [selectedPrensa, setSelectedPrensa] = useState('');
   const [pressedButtons, setPressedButtons] = useState<{ [key: string]: boolean }>({});
+  const navigate = useNavigate();
 
   const selectedPress = prensas.find(p => p.id === selectedPrensa);
 
@@ -96,7 +98,16 @@ const PrensaDashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="card p-8 max-w-md w-full">
-          <h1 className="text-3xl font-bold text-center mb-8">Panel de Prensa</h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">Panel de Prensa</h1>
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+            >
+              <Home className="h-5 w-5" />
+              <span>Panel Principal</span>
+            </button>
+          </div>
           
           <div className="space-y-4">
             <div>
@@ -124,12 +135,21 @@ const PrensaDashboard: React.FC = () => {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Panel de Prensa</h1>
-        <button
-          onClick={() => setSelectedPrensa('')}
-          className="btn-secondary text-sm"
-        >
-          Cambiar Prensa
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+          >
+            <Home className="h-5 w-5" />
+            <span>Panel Principal</span>
+          </button>
+          <button
+            onClick={() => setSelectedPrensa('')}
+            className="btn-secondary text-sm"
+          >
+            Cambiar Prensa
+          </button>
+        </div>
       </div>
       
       {selectedPress && (

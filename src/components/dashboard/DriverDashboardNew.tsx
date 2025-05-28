@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import { User, Truck, AlertTriangle, Grid3X3, List } from 'lucide-react';
+import { User, Truck, AlertTriangle, Grid3X3, List, Home } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const DriverDashboardNew: React.FC = () => {
   const { users } = useAuth();
@@ -11,6 +11,7 @@ const DriverDashboardNew: React.FC = () => {
   const [selectedDriver, setSelectedDriver] = useState('');
   const [isDriverSelected, setIsDriverSelected] = useState(false);
   const [viewMode, setViewMode] = useState<'alerts' | 'presses'>('alerts');
+  const navigate = useNavigate();
 
   const shifts = [...new Set(users.filter(u => u.role === 'driver').map(u => u.shift))];
   const driversInShift = users.filter(u => u.role === 'driver' && u.shift === selectedShift);
@@ -48,7 +49,16 @@ const DriverDashboardNew: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <Truck className="h-16 w-16 text-orange-500 mx-auto mb-4" />
+            <div className="flex items-center justify-between mb-4">
+              <Truck className="h-16 w-16 text-orange-500 mx-auto" />
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center space-x-1 text-gray-600 hover:text-gray-800 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <Home className="h-4 w-4" />
+                <span className="text-sm">Inicio</span>
+              </button>
+            </div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2">Panel de Conductor</h1>
             <p className="text-gray-600">Selecciona tu turno y nombre</p>
           </div>
@@ -153,6 +163,13 @@ const DriverDashboardNew: React.FC = () => {
                 <span>Prensas</span>
               </button>
             </div>
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 px-3 py-1 border border-gray-300 rounded-md"
+            >
+              <Home className="h-4 w-4" />
+              <span className="text-sm">Panel Principal</span>
+            </button>
             <button
               onClick={handleBack}
               className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 border border-gray-300 rounded-md"
