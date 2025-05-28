@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
@@ -7,7 +8,7 @@ import { toast } from '@/hooks/use-toast';
 
 const PrensasDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { addAlert, alerts, cancelAlert } = useData();
+  const { addAlert, alerts, cancelAlert, prensas } = useData();
   const [pressedButtons, setPressedButtons] = useState<{ [key: string]: boolean }>({});
 
   // Get the press info if user is a press type
