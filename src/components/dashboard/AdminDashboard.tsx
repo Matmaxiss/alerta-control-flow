@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Users, Settings, Activity, Plus } from 'lucide-react';
 import UserManagement from '../admin/UserManagement';
 import PrensaManagement from '../admin/PrensaManagement';
+import ButtonManagement from '../admin/ButtonManagement';
 import AlertsView from '../common/AlertsView';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -13,7 +14,8 @@ const AdminDashboard: React.FC = () => {
   const tabs = [
     { id: 'alerts', label: 'Alerts', icon: Activity },
     { id: 'users', label: 'Users', icon: Users },
-    { id: 'prensas', label: 'Presses', icon: Settings },
+    { id: 'presses', label: 'Presses', icon: Settings },
+    { id: 'buttons', label: 'Botones', icon: Plus },
   ];
 
   return (
@@ -60,7 +62,8 @@ const AdminDashboard: React.FC = () => {
       <div className="mt-6">
         {activeTab === 'alerts' && <AlertsView />}
         {activeTab === 'users' && <UserManagement />}
-        {activeTab === 'prensas' && <PrensaManagement />}
+        {activeTab === 'presses' && <PrensaManagement />}
+        {activeTab === 'buttons' && <ButtonManagement />}
       </div>
     </div>
   );

@@ -3,10 +3,18 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Alert, Prensa, PrensaBlock } from '../types';
 import { useAuth } from './AuthContext';
 
+interface AlertButton {
+  id: string;
+  name: string;
+  image?: string;
+  color: string;
+}
+
 interface DataContextType {
   alerts: Alert[];
   prensas: Prensa[];
   prensaBlocks: PrensaBlock[];
+  alertButtons: AlertButton[];
   addAlert: (alert: Omit<Alert, 'id' | 'timestamp'>) => void;
   cancelAlert: (id: string) => void;
   addPrensa: (prensa: Omit<Prensa, 'id'>) => void;
@@ -15,6 +23,9 @@ interface DataContextType {
   addPrensaBlock: (block: Omit<PrensaBlock, 'id'>) => void;
   updatePrensaBlock: (id: string, updates: Partial<PrensaBlock>) => void;
   deletePrensaBlock: (id: string) => void;
+  addAlertButton: (button: Omit<AlertButton, 'id'>) => void;
+  updateAlertButton: (id: string, updates: Partial<AlertButton>) => void;
+  deleteAlertButton: (id: string) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -36,22 +47,41 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     { id: '4', name: 'Press 4', status: 'active', shift: '2 shift' },
   ]);
   const [prensaBlocks, setPrensaBlocks] = useState<PrensaBlock[]>([]);
+  const [alertButtons, setAlertButtons] = useState<AlertButton[]>([
+    { id: '1', name: 'Mechanical', color: '#ef4444' },
+    { id: '2', name: 'Electrical', color: '#f97316' },
+    { id: '3', name: 'Quality', color: '#eab308' },
+    { id: '4', name: 'Material', color: '#22c55e' },
+    { id: '5', name: 'Other', color: '#6366f1' },
+    { id: '6', name: 'Cancel', color: '#eab308' },
+  ]);
 
   useEffect(() => {
     const savedAlerts = localStorage.getItem('alerts');
     const savedPrensas = localStorage.getItem('prensas');
     const savedBlocks = localStorage.getItem('prensaBlocks');
+    const savedButtons = localStorage.getItem('alertButtons');
     
-    if (savedAlerts) setAlerts(JSON.parse(savedAlerts));
+    if (savedAlerts) {
+      const parsedAlerts = JSON.parse(savedAlerts);
+      // Convert timestamp strings back to Date objects
+      const alertsWithDates = parsedAlerts.map((alert: any) => ({
+        ...alert,
+        timestamp: new Date(alert.timestamp)
+      }));
+      setAlerts(alertsWithDates);
+    }
     if (savedPrensas) setPrensas(JSON.parse(savedPrensas));
     if (savedBlocks) setPrensaBlocks(JSON.parse(savedBlocks));
+    if (savedButtons) setAlertButtons(JSON.parse(savedButtons));
   }, []);
 
   useEffect(() => {
     localStorage.setItem('alerts', JSON.stringify(alerts));
     localStorage.setItem('prensas', JSON.stringify(prensas));
     localStorage.setItem('prensaBlocks', JSON.stringify(prensaBlocks));
-  }, [alerts, prensas, prensaBlocks]);
+    localStorage.setItem('alertButtons', JSON.stringify(alertButtons));
+  }, [alerts, prensas, prensaBlocks, alertButtons]);
 
   const addAlert = (alertData: Omit<Alert, 'id' | 'timestamp'>) => {
     const newAlert: Alert = {
@@ -104,11 +134,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPrensaBlocks(prev => prev.filter(block => block.id !== id));
   };
 
+  const addAlertButton = (buttonData: Omit<AlertButton, 'id'>) => {
+    const newButton: AlertButton = {
+      ...buttonData,
+      id: Date.now().toString(),
+    };
+    setAlertButtons(prev => [...prev, newButton]);
+  };
+
+  const updateAlertButton = (id: string, updates: Partial<AlertButton>) => {
+    setAlertButtons(prev => prev.map(button => 
+      button.id === id ? { ...button, ...updates } : button
+    ));
+  };
+
+  const deleteAlertButton = (id: string) => {
+    setAlertButtons(prev => prev.filter(button => button.id !== id));
+  };
+
   return (
     <DataContext.Provider value={{
       alerts,
       prensas,
       prensaBlocks,
+      alertButtons,
       addAlert,
       cancelAlert,
       addPrensa,
@@ -117,6 +166,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addPrensaBlock,
       updatePrensaBlock,
       deletePrensaBlock,
+      addAlertButton,
+      updateAlertButton,
+      deleteAlertButton,
     }}>
       {children}
     </DataContext.Provider>

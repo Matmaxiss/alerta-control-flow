@@ -1,14 +1,14 @@
 
+
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import { Play, Square, AlertTriangle, Settings } from 'lucide-react';
-import { ALERT_TYPES } from '../../types';
+import { Play, Square, AlertTriangle, Settings, Image } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const PrensasDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { addAlert, alerts, cancelAlert, prensas } = useData();
+  const { addAlert, alerts, cancelAlert, prensas, alertButtons } = useData();
   const [pressedButtons, setPressedButtons] = useState<{ [key: string]: boolean }>({});
 
   // Get the press info if user is a press type
@@ -18,8 +18,8 @@ const PrensasDashboard: React.FC = () => {
     alert.status === 'active' && alert.userId === user?.id
   );
 
-  const handleButtonPress = (alertType: string) => {
-    if (alertType === 'Cancel') {
+  const handleButtonPress = (buttonName: string) => {
+    if (buttonName === 'Cancel') {
       // Cancel all active alerts for this user
       activeAlerts.forEach(alert => {
         cancelAlert(alert.id);
@@ -43,10 +43,10 @@ const PrensasDashboard: React.FC = () => {
         description: "Todas las alertas activas han sido canceladas",
       });
     } else {
-      setPressedButtons(prev => ({ ...prev, [alertType]: true }));
+      setPressedButtons(prev => ({ ...prev, [buttonName]: true }));
       
       addAlert({
-        type: alertType as any,
+        type: buttonName as any,
         userId: user?.id || '',
         username: user?.username || '',
         status: 'active',
@@ -57,30 +57,34 @@ const PrensasDashboard: React.FC = () => {
 
       toast({
         title: "Alerta creada",
-        description: `Alerta de tipo ${alertType} ha sido enviada desde ${userPress?.name || 'prensa'}`,
+        description: `Alerta de tipo ${buttonName} ha sido enviada desde ${userPress?.name || 'prensa'}`,
       });
     }
   };
 
-  const getButtonColor = (alertType: string) => {
-    if (alertType === 'Cancel') {
+  const getButtonColor = (button: any) => {
+    if (button.name === 'Cancel') {
       return 'bg-yellow-500 hover:bg-yellow-600';
     }
     
-    const isPressed = pressedButtons[alertType] || activeAlerts.some(alert => 
-      alert.type === alertType && alert.userId === user?.id
+    const isPressed = pressedButtons[button.name] || activeAlerts.some(alert => 
+      alert.type === button.name && alert.userId === user?.id
     );
     
-    return isPressed 
-      ? 'bg-red-500 hover:bg-red-600' 
-      : 'bg-green-500 hover:bg-green-600';
+    if (isPressed) {
+      return 'bg-red-500 hover:bg-red-600';
+    }
+    
+    // Use custom color or fallback to green
+    const customColor = button.color || '#22c55e';
+    return `hover:opacity-80`;
   };
 
-  const getButtonIcon = (alertType: string) => {
-    if (alertType === 'Cancel') return Square;
+  const getButtonIcon = (button: any) => {
+    if (button.name === 'Cancel') return Square;
     
-    const isPressed = pressedButtons[alertType] || activeAlerts.some(alert => 
-      alert.type === alertType && alert.userId === user?.id
+    const isPressed = pressedButtons[button.name] || activeAlerts.some(alert => 
+      alert.type === button.name && alert.userId === user?.id
     );
     
     return isPressed ? AlertTriangle : Play;
@@ -133,23 +137,38 @@ const PrensasDashboard: React.FC = () => {
         <h2 className="text-xl font-semibold mb-6">Botones de Alerta</h2>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {ALERT_TYPES.map((alertType) => {
-            const Icon = getButtonIcon(alertType);
-            const isPressed = alertType !== 'Cancel' && (
-              pressedButtons[alertType] || activeAlerts.some(alert => 
-                alert.type === alertType && alert.userId === user?.id
+          {alertButtons.map((button) => {
+            const Icon = getButtonIcon(button);
+            const isPressed = button.name !== 'Cancel' && (
+              pressedButtons[button.name] || activeAlerts.some(alert => 
+                alert.type === button.name && alert.userId === user?.id
               )
             );
             
             return (
               <button
-                key={alertType}
-                onClick={() => handleButtonPress(alertType)}
-                className={`${getButtonColor(alertType)} text-white p-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl`}
+                key={button.id}
+                onClick={() => handleButtonPress(button.name)}
+                className={`${getButtonColor(button)} text-white p-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl`}
+                style={{
+                  backgroundColor: button.name === 'Cancel' 
+                    ? '#eab308' 
+                    : isPressed 
+                      ? '#ef4444' 
+                      : button.color
+                }}
               >
                 <div className="flex flex-col items-center space-y-2">
-                  <Icon className="h-8 w-8" />
-                  <span className="font-semibold text-lg">{alertType}</span>
+                  {button.image ? (
+                    <img 
+                      src={button.image} 
+                      alt={button.name}
+                      className="w-8 h-8 object-cover rounded"
+                    />
+                  ) : (
+                    <Icon className="h-8 w-8" />
+                  )}
+                  <span className="font-semibold text-lg">{button.name}</span>
                   {isPressed && (
                     <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
                       ACTIVO
