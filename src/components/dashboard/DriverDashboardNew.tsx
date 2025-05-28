@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import { User, Truck, AlertTriangle } from 'lucide-react';
+import { User, Truck, AlertTriangle, Grid3X3, List } from 'lucide-react';
 
 const DriverDashboardNew: React.FC = () => {
   const { users } = useAuth();
@@ -10,6 +10,7 @@ const DriverDashboardNew: React.FC = () => {
   const [selectedShift, setSelectedShift] = useState('');
   const [selectedDriver, setSelectedDriver] = useState('');
   const [isDriverSelected, setIsDriverSelected] = useState(false);
+  const [viewMode, setViewMode] = useState<'alerts' | 'presses'>('alerts');
 
   const shifts = [...new Set(users.filter(u => u.role === 'driver').map(u => u.shift))];
   const driversInShift = users.filter(u => u.role === 'driver' && u.shift === selectedShift);
@@ -21,6 +22,14 @@ const DriverDashboardNew: React.FC = () => {
     alert.status === 'active' && 
     alert.userId === selectedDriver
   );
+
+  // Get alerts by prensa to determine cube colors
+  const getPrensaAlerts = (prensaId: string) => {
+    return alerts.filter(alert => 
+      alert.status === 'active' && 
+      alert.prensaId === prensaId
+    );
+  };
 
   const handleDriverConfirm = () => {
     if (selectedShift && selectedDriver) {
@@ -118,81 +127,163 @@ const DriverDashboardNew: React.FC = () => {
               </div>
             </div>
           </div>
-          <button
-            onClick={handleBack}
-            className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 border border-gray-300 rounded-md"
-          >
-            Cambiar
-          </button>
+          <div className="flex items-center space-x-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('alerts')}
+                className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
+                  viewMode === 'alerts' 
+                    ? 'bg-white text-orange-600 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                <List className="h-4 w-4" />
+                <span>Alertas</span>
+              </button>
+              <button
+                onClick={() => setViewMode('presses')}
+                className={`flex items-center space-x-1 px-3 py-1 rounded text-sm transition-colors ${
+                  viewMode === 'presses' 
+                    ? 'bg-white text-orange-600 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                <Grid3X3 className="h-4 w-4" />
+                <span>Prensas</span>
+              </button>
+            </div>
+            <button
+              onClick={handleBack}
+              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 border border-gray-300 rounded-md"
+            >
+              Cambiar
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Prensas asignadas - compacto */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Truck className="h-5 w-5 mr-2 text-orange-500" />
-              Prensas Asignadas
-            </h3>
-            
-            {assignedPrensas.length > 0 ? (
-              <div className="space-y-2">
-                {assignedPrensas.map(prensa => (
-                  <div key={prensa.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <span className="text-sm font-medium">{prensa.name}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      prensa.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {prensa.status === 'active' ? 'Activa' : 'Inactiva'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-sm">No hay prensas asignadas</p>
-            )}
+      {viewMode === 'alerts' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Prensas asignadas - compacto */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Truck className="h-5 w-5 mr-2 text-orange-500" />
+                Prensas Asignadas
+              </h3>
+              
+              {assignedPrensas.length > 0 ? (
+                <div className="space-y-2">
+                  {assignedPrensas.map(prensa => (
+                    <div key={prensa.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span className="text-sm font-medium">{prensa.name}</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        prensa.status === 'active' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {prensa.status === 'active' ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No hay prensas asignadas</p>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Alertas activas */}
-        <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold mb-4">Alertas Activas ({activeDriverAlerts.length})</h3>
-            
-            {activeDriverAlerts.length > 0 ? (
-              <div className="space-y-3">
-                {activeDriverAlerts.map(alert => (
-                  <div key={alert.id} className="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                      <div>
-                        <span className="font-medium text-red-900">{alert.type}</span>
-                        <div className="text-sm text-red-600">
-                          {alert.timestamp.toLocaleTimeString()}
-                          {alert.prensaName && (
-                            <span className="ml-2">• {alert.prensaName}</span>
-                          )}
+          {/* Alertas activas */}
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold mb-4">Alertas Activas ({activeDriverAlerts.length})</h3>
+              
+              {activeDriverAlerts.length > 0 ? (
+                <div className="space-y-3">
+                  {activeDriverAlerts.map(alert => (
+                    <div key={alert.id} className="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                        <div>
+                          <span className="font-medium text-red-900">{alert.type}</span>
+                          <div className="text-sm text-red-600">
+                            {alert.timestamp.toLocaleTimeString()}
+                            {alert.prensaName && (
+                              <span className="ml-2">• {alert.prensaName}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
+                      <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                        ACTIVA
+                      </span>
                     </div>
-                    <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                      ACTIVA
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No hay alertas activas</p>
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No hay alertas activas</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        /* Vista de prensas en cubos */
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-6">Prensas Asignadas - Vista de Cubos</h3>
+          
+          {assignedPrensas.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {assignedPrensas.map(prensa => {
+                const prensaAlerts = getPrensaAlerts(prensa.id);
+                const hasActiveAlerts = prensaAlerts.length > 0;
+                
+                return (
+                  <div
+                    key={prensa.id}
+                    className={`relative p-6 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:shadow-md ${
+                      hasActiveAlerts
+                        ? 'bg-red-50 border-red-200 hover:border-red-300'
+                        : 'bg-green-50 border-green-200 hover:border-green-300'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${
+                        hasActiveAlerts ? 'bg-red-500' : 'bg-green-500'
+                      }`}>
+                        <Truck className="h-6 w-6 text-white" />
+                      </div>
+                      <h4 className={`text-sm font-semibold ${
+                        hasActiveAlerts ? 'text-red-800' : 'text-green-800'
+                      }`}>
+                        {prensa.name}
+                      </h4>
+                      <p className={`text-xs mt-1 ${
+                        hasActiveAlerts ? 'text-red-600' : 'text-green-600'
+                      }`}>
+                        {hasActiveAlerts ? `${prensaAlerts.length} alerta(s)` : 'Sin alertas'}
+                      </p>
+                    </div>
+                    
+                    {/* Badge de estado */}
+                    <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${
+                      hasActiveAlerts ? 'bg-red-500' : 'bg-green-500'
+                    }`} />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Truck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No hay prensas asignadas</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
