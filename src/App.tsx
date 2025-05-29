@@ -13,6 +13,7 @@ import DriverDashboardNew from "./components/dashboard/DriverDashboardNew";
 import PrensaDashboard from "./components/dashboard/PrensaDashboard";
 import SupervisorDashboard from "./components/dashboard/SupervisorDashboard";
 import AdminDashboard from "./components/dashboard/AdminDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,8 +29,26 @@ const App = () => (
             <Routes>
               <Route path="/" element={<PanelSelector />} />
               <Route path="/login" element={<LoginForm />} />
-              <Route path="/admin" element={<Layout><AdminDashboard /></Layout>} />
-              <Route path="/supervisor" element={<Layout><SupervisorDashboard /></Layout>} />
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <Layout>
+                      <AdminDashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/supervisor" 
+                element={
+                  <ProtectedRoute requiredRole="supervisor">
+                    <Layout>
+                      <SupervisorDashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="/driver" element={<DriverDashboardNew />} />
               <Route path="/prensa" element={<PrensaDashboard />} />
               <Route path="*" element={<NotFound />} />
