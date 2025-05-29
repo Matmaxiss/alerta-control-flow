@@ -17,6 +17,7 @@ interface DataContextType {
   alertButtons: AlertButton[];
   addAlert: (alert: Omit<Alert, 'id' | 'timestamp'>) => void;
   cancelAlert: (id: string) => void;
+  resolveAlert: (id: string) => void;
   addPrensa: (prensa: Omit<Prensa, 'id'>) => void;
   updatePrensa: (id: string, updates: Partial<Prensa>) => void;
   deletePrensa: (id: string) => void;
@@ -98,6 +99,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ));
   };
 
+  const resolveAlert = (id: string) => {
+    setAlerts(prev => prev.map(alert => 
+      alert.id === id ? { ...alert, status: 'resolved' as const } : alert
+    ));
+  };
+
   const addPrensa = (prensaData: Omit<Prensa, 'id'>) => {
     const newPrensa: Prensa = {
       ...prensaData,
@@ -160,6 +167,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       alertButtons,
       addAlert,
       cancelAlert,
+      resolveAlert,
       addPrensa,
       updatePrensa,
       deletePrensa,

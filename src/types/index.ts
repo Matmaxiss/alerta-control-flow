@@ -18,7 +18,7 @@ export interface Alert {
   userId: string;
   username: string;
   timestamp: Date;
-  status: 'active' | 'cancelled';
+  status: 'active' | 'cancelled' | 'resolved';
   shift: string;
 }
 

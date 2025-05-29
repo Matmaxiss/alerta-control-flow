@@ -1,13 +1,14 @@
 
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { Alert } from '../../../types';
 
 interface ActiveAlertsProps {
   alerts: Alert[];
+  onResolveAlert: (alertId: string) => void;
 }
 
-const ActiveAlerts: React.FC<ActiveAlertsProps> = ({ alerts }) => {
+const ActiveAlerts: React.FC<ActiveAlertsProps> = ({ alerts, onResolveAlert }) => {
   return (
     <div className="card p-6">
       <h3 className="text-lg font-semibold mb-4">
@@ -16,7 +17,12 @@ const ActiveAlerts: React.FC<ActiveAlertsProps> = ({ alerts }) => {
       {alerts.length > 0 ? (
         <div className="space-y-2">
           {alerts.map(alert => (
-            <div key={alert.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div 
+              key={alert.id} 
+              className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg cursor-pointer hover:bg-red-100 transition-colors"
+              onClick={() => onResolveAlert(alert.id)}
+              title="Haz clic para marcar como resuelta"
+            >
               <div className="flex items-center space-x-3">
                 <AlertTriangle className="h-5 w-5 text-red-600" />
                 <div>
@@ -29,9 +35,12 @@ const ActiveAlerts: React.FC<ActiveAlertsProps> = ({ alerts }) => {
                   </div>
                 </div>
               </div>
-              <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                Activa
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                  Activa
+                </span>
+                <CheckCircle className="h-4 w-4 text-gray-400" />
+              </div>
             </div>
           ))}
         </div>

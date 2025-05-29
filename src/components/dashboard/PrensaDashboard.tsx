@@ -10,23 +10,16 @@ import AlertButtons from './prensa/AlertButtons';
 import ActiveAlerts from './prensa/ActiveAlerts';
 
 const PrensaDashboard: React.FC = () => {
-  const { addAlert, alerts, cancelAlert, prensas, alertButtons } = useData();
+  const { addAlert, alerts, cancelAlert, resolveAlert, prensas, alertButtons } = useData();
   const [selectedPrensa, setSelectedPrensa] = useState('');
   const [pressedButtons, setPressedButtons] = useState<{ [key: string]: boolean }>({});
   const navigate = useNavigate();
 
   const selectedPress = prensas.find(p => p.id === selectedPrensa);
 
-  // Debug: log alerts to see what we have
-  console.log('All alerts:', alerts);
-  console.log('Selected prensa ID:', selectedPrensa);
-
-  const activeAlerts = alerts.filter(alert => {
-    console.log('Checking alert:', alert, 'Alert prensaId:', alert.prensaId, 'Selected prensa:', selectedPrensa);
-    return alert.status === 'active' && alert.prensaId === selectedPrensa;
-  });
-
-  console.log('Active alerts for selected prensa:', activeAlerts);
+  const activeAlerts = alerts.filter(alert => 
+    alert.status === 'active' && alert.prensaId === selectedPrensa
+  );
 
   // Filter buttons for press role
   const visibleButtons = alertButtons.filter(button => 
@@ -62,8 +55,6 @@ const PrensaDashboard: React.FC = () => {
     } else {
       setPressedButtons(prev => ({ ...prev, [buttonName]: true }));
       
-      console.log('Creating alert for prensa:', selectedPress.id, selectedPress.name);
-      
       addAlert({
         type: buttonName,
         userId: selectedPress.id,
@@ -79,6 +70,21 @@ const PrensaDashboard: React.FC = () => {
         description: `Alerta de tipo ${buttonName} ha sido enviada desde ${selectedPress.name}`,
       });
     }
+  };
+
+  const handleResolveAlert = (alertId: string) => {
+    resolveAlert(alertId);
+    
+    // Reset the pressed button state for the resolved alert
+    const resolvedAlert = alerts.find(alert => alert.id === alertId);
+    if (resolvedAlert) {
+      setPressedButtons(prev => ({ ...prev, [resolvedAlert.type]: false }));
+    }
+
+    toast({
+      title: "Alerta resuelta",
+      description: "La alerta ha sido marcada como resuelta",
+    });
   };
 
   if (!selectedPrensa) {
@@ -122,7 +128,10 @@ const PrensaDashboard: React.FC = () => {
         onButtonPress={handleButtonPress}
       />
 
-      <ActiveAlerts alerts={activeAlerts} />
+      <ActiveAlerts 
+        alerts={activeAlerts} 
+        onResolveAlert={handleResolveAlert}
+      />
     </div>
   );
 };
