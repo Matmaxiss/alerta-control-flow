@@ -15,11 +15,19 @@ const PrensaDashboard: React.FC = () => {
   const [pressedButtons, setPressedButtons] = useState<{ [key: string]: boolean }>({});
   const navigate = useNavigate();
 
+  console.log('PrensaDashboard - all alerts:', alerts);
+  console.log('PrensaDashboard - selectedPrensa:', selectedPrensa);
+
   const selectedPress = prensas.find(p => p.id === selectedPrensa);
 
-  const activeAlerts = alerts.filter(alert => 
-    alert.status === 'active' && alert.prensaId === selectedPrensa
-  );
+  const activeAlerts = alerts.filter(alert => {
+    const isActive = alert.status === 'active';
+    const matchesPrensa = alert.prensaId === selectedPrensa;
+    console.log(`Alert ${alert.id}: status=${alert.status}, prensaId=${alert.prensaId}, selectedPrensa=${selectedPrensa}, isActive=${isActive}, matchesPrensa=${matchesPrensa}`);
+    return isActive && matchesPrensa;
+  });
+
+  console.log('PrensaDashboard - activeAlerts after filter:', activeAlerts);
 
   // Filter buttons for press role
   const visibleButtons = alertButtons.filter(button => 

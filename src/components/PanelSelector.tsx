@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Settings, Truck, Eye } from 'lucide-react';
+import { Shield, Settings, Truck, Eye, Wrench } from 'lucide-react';
 
 const PanelSelector: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +24,15 @@ const PanelSelector: React.FC = () => {
       color: 'bg-green-600 hover:bg-green-700',
       requiresAuth: true,
       path: '/supervisor'
+    },
+    {
+      id: 'technical',
+      title: 'Panel Técnico',
+      description: 'Gestión técnica y mantenimiento',
+      icon: Wrench,
+      color: 'bg-red-600 hover:bg-red-700',
+      requiresAuth: true,
+      path: '/technical'
     },
     {
       id: 'driver',

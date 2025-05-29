@@ -13,6 +13,7 @@ import DriverDashboardNew from "./components/dashboard/DriverDashboardNew";
 import PrensaDashboard from "./components/dashboard/PrensaDashboard";
 import SupervisorDashboard from "./components/dashboard/SupervisorDashboard";
 import AdminDashboard from "./components/dashboard/AdminDashboard";
+import TechnicalDashboard from "./components/dashboard/TechnicalDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +46,16 @@ const App = () => (
                   <ProtectedRoute requiredRole="supervisor">
                     <Layout>
                       <SupervisorDashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/technical" 
+                element={
+                  <ProtectedRoute requiredRole="technical">
+                    <Layout>
+                      <TechnicalDashboard />
                     </Layout>
                   </ProtectedRoute>
                 } 
