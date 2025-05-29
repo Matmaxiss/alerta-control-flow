@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useData } from '../../contexts/DataContext';
 import { Play, Square, AlertTriangle, Settings, Home } from 'lucide-react';
@@ -13,9 +12,16 @@ const PrensaDashboard: React.FC = () => {
 
   const selectedPress = prensas.find(p => p.id === selectedPrensa);
 
-  const activeAlerts = alerts.filter(alert => 
-    alert.status === 'active' && alert.prensaId === selectedPrensa
-  );
+  // Debug: log alerts to see what we have
+  console.log('All alerts:', alerts);
+  console.log('Selected prensa ID:', selectedPrensa);
+
+  const activeAlerts = alerts.filter(alert => {
+    console.log('Checking alert:', alert, 'Alert prensaId:', alert.prensaId, 'Selected prensa:', selectedPrensa);
+    return alert.status === 'active' && alert.prensaId === selectedPrensa;
+  });
+
+  console.log('Active alerts for selected prensa:', activeAlerts);
 
   // Filter buttons for press role
   const visibleButtons = alertButtons.filter(button => 
@@ -50,6 +56,8 @@ const PrensaDashboard: React.FC = () => {
       });
     } else {
       setPressedButtons(prev => ({ ...prev, [buttonName]: true }));
+      
+      console.log('Creating alert for prensa:', selectedPress.id, selectedPress.name);
       
       addAlert({
         type: buttonName,
@@ -231,9 +239,11 @@ const PrensaDashboard: React.FC = () => {
       </div>
 
       {/* Active Alerts */}
-      {activeAlerts.length > 0 && (
-        <div className="card p-6">
-          <h3 className="text-lg font-semibold mb-4">Alertas Activas</h3>
+      <div className="card p-6">
+        <h3 className="text-lg font-semibold mb-4">
+          Alertas Activas ({activeAlerts.length})
+        </h3>
+        {activeAlerts.length > 0 ? (
           <div className="space-y-2">
             {activeAlerts.map(alert => (
               <div key={alert.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -244,6 +254,9 @@ const PrensaDashboard: React.FC = () => {
                     <span className="text-sm text-red-600 ml-2">
                       {alert.timestamp.toLocaleTimeString()}
                     </span>
+                    <div className="text-sm text-red-600">
+                      Prensa: {alert.prensaName}
+                    </div>
                   </div>
                 </div>
                 <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
@@ -252,8 +265,13 @@ const PrensaDashboard: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-center py-8">
+            <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">No hay alertas activas para esta prensa</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
