@@ -18,7 +18,7 @@ const AppContent: React.FC = () => {
 
   // If no panel is selected, show panel selector
   if (!selectedPanel) {
-    return <PanelSelector onPanelSelect={setSelectedPanel} />;
+    return <PanelSelector />;
   }
 
   // Driver panel doesn't require authentication
