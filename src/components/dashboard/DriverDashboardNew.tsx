@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
@@ -6,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const DriverDashboardNew: React.FC = () => {
   const { users } = useAuth();
-  const { prensas, alerts } = useData();
+  const { prensas, alerts, setAlertWorking, resolveAlert } = useData();
   const [selectedShift, setSelectedShift] = useState('');
   const [selectedDriver, setSelectedDriver] = useState('');
   const [isDriverSelected, setIsDriverSelected] = useState(false);
@@ -18,18 +19,27 @@ const DriverDashboardNew: React.FC = () => {
   const assignedPrensas = prensas.filter(p => p.assignedToDriver === selectedDriver);
   const selectedDriverUser = users.find(u => u.id === selectedDriver);
 
-  // Only show active alerts for driver role
+  // Only show active and working alerts for driver role
   const activeDriverAlerts = alerts.filter(alert => 
-    alert.status === 'active' && 
+    (alert.status === 'active' || alert.status === 'working') && 
     alert.userId === selectedDriver
   );
 
   // Get alerts by prensa to determine cube colors
   const getPrensaAlerts = (prensaId: string) => {
     return alerts.filter(alert => 
-      alert.status === 'active' && 
+      (alert.status === 'active' || alert.status === 'working') && 
       alert.prensaId === prensaId
     );
+  };
+
+  const handleAlertClick = (alert: any) => {
+    console.log('Alert clicked:', alert.id, 'Current status:', alert.status);
+    if (alert.status === 'active') {
+      setAlertWorking(alert.id);
+    } else if (alert.status === 'working') {
+      resolveAlert(alert.id);
+    }
   };
 
   const handleDriverConfirm = () => {
@@ -219,12 +229,29 @@ const DriverDashboardNew: React.FC = () => {
               {activeDriverAlerts.length > 0 ? (
                 <div className="space-y-3">
                   {activeDriverAlerts.map(alert => (
-                    <div key={alert.id} className="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div 
+                      key={alert.id} 
+                      className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                        alert.status === 'active' 
+                          ? 'bg-red-50 border-red-200 hover:border-red-300' 
+                          : 'bg-orange-50 border-orange-200 hover:border-orange-300'
+                      }`}
+                      onClick={() => handleAlertClick(alert)}
+                      title={alert.status === 'active' ? 'Haz clic para marcar como "Trabajando"' : 'Haz clic para marcar como "Resuelta"'}
+                    >
                       <div className="flex items-center space-x-3">
-                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                        <AlertTriangle className={`h-5 w-5 ${
+                          alert.status === 'active' ? 'text-red-600' : 'text-orange-600'
+                        }`} />
                         <div>
-                          <span className="font-medium text-red-900">{alert.type}</span>
-                          <div className="text-sm text-red-600">
+                          <span className={`font-medium ${
+                            alert.status === 'active' ? 'text-red-900' : 'text-orange-900'
+                          }`}>
+                            {alert.type}
+                          </span>
+                          <div className={`text-sm ${
+                            alert.status === 'active' ? 'text-red-600' : 'text-orange-600'
+                          }`}>
                             {alert.timestamp.toLocaleTimeString()}
                             {alert.prensaName && (
                               <span className="ml-2">• {alert.prensaName}</span>
@@ -232,9 +259,15 @@ const DriverDashboardNew: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                        ACTIVA
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          alert.status === 'active' 
+                            ? 'bg-red-100 text-red-800' 
+                            : 'bg-orange-100 text-orange-800'
+                        }`}>
+                          {alert.status === 'active' ? 'ACTIVA' : 'TRABAJANDO'}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -256,38 +289,49 @@ const DriverDashboardNew: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {assignedPrensas.map(prensa => {
                 const prensaAlerts = getPrensaAlerts(prensa.id);
-                const hasActiveAlerts = prensaAlerts.length > 0;
+                const hasActiveAlerts = prensaAlerts.some(alert => alert.status === 'active');
+                const hasWorkingAlerts = prensaAlerts.some(alert => alert.status === 'working');
+                
+                let bgColor = 'bg-green-50 border-green-200 hover:border-green-300';
+                let iconColor = 'bg-green-500';
+                let textColor = 'text-green-800';
+                let subtextColor = 'text-green-600';
+                let statusText = 'Sin alertas';
+                
+                if (hasActiveAlerts) {
+                  bgColor = 'bg-red-50 border-red-200 hover:border-red-300';
+                  iconColor = 'bg-red-500';
+                  textColor = 'text-red-800';
+                  subtextColor = 'text-red-600';
+                  statusText = `${prensaAlerts.filter(a => a.status === 'active').length} alerta(s)`;
+                } else if (hasWorkingAlerts) {
+                  bgColor = 'bg-orange-50 border-orange-200 hover:border-orange-300';
+                  iconColor = 'bg-orange-500';
+                  textColor = 'text-orange-800';
+                  subtextColor = 'text-orange-600';
+                  statusText = 'Trabajando';
+                }
                 
                 return (
                   <div
                     key={prensa.id}
-                    className={`relative p-6 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:shadow-md ${
-                      hasActiveAlerts
-                        ? 'bg-red-50 border-red-200 hover:border-red-300'
-                        : 'bg-green-50 border-green-200 hover:border-green-300'
-                    }`}
+                    className={`relative p-6 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:shadow-md ${bgColor}`}
                   >
                     <div className="text-center">
-                      <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${
-                        hasActiveAlerts ? 'bg-red-500' : 'bg-green-500'
-                      }`}>
+                      <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${iconColor}`}>
                         <Truck className="h-6 w-6 text-white" />
                       </div>
-                      <h4 className={`text-sm font-semibold ${
-                        hasActiveAlerts ? 'text-red-800' : 'text-green-800'
-                      }`}>
+                      <h4 className={`text-sm font-semibold ${textColor}`}>
                         {prensa.name}
                       </h4>
-                      <p className={`text-xs mt-1 ${
-                        hasActiveAlerts ? 'text-red-600' : 'text-green-600'
-                      }`}>
-                        {hasActiveAlerts ? `${prensaAlerts.length} alerta(s)` : 'Sin alertas'}
+                      <p className={`text-xs mt-1 ${subtextColor}`}>
+                        {statusText}
                       </p>
                     </div>
                     
                     {/* Badge de estado */}
                     <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${
-                      hasActiveAlerts ? 'bg-red-500' : 'bg-green-500'
+                      hasActiveAlerts ? 'bg-red-500' : hasWorkingAlerts ? 'bg-orange-500' : 'bg-green-500'
                     }`} />
                   </div>
                 );
