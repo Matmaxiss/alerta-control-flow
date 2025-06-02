@@ -1,20 +1,23 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import { Play, Square, AlertTriangle, Settings, Image } from 'lucide-react';
+import { Play, Square, AlertTriangle, Clock, CheckCircle, Settings, Image } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const PrensasDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { addAlert, alerts, cancelAlert, prensas, alertButtons } = useData();
+  const { addAlert, alerts, cancelAlert, resolveAlert, setAlertWorking, prensas, alertButtons } = useData();
   const [pressedButtons, setPressedButtons] = useState<{ [key: string]: boolean }>({});
 
   // Get the press info if user is a press type
   const userPress = user?.role === 'press' ? prensas.find(p => p.id === user.prensaId) : null;
 
-  const activeAlerts = alerts.filter(alert => 
-    alert.status === 'active' && alert.userId === user?.id
-  );
+  const activeAlerts = alerts
+    .filter(alert => 
+      (alert.status === 'active' || alert.status === 'working') && alert.userId === user?.id
+    )
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
   // Filter buttons based on user role - admin and supervisor see all buttons
   const visibleButtons = alertButtons.filter(button => {
@@ -68,6 +71,31 @@ const PrensasDashboard: React.FC = () => {
     }
   };
 
+  const handleAlertClick = (alertId: string) => {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+
+    console.log('Alert clicked:', alertId, 'Current status:', alert.status);
+    
+    if (alert.status === 'active') {
+      setAlertWorking(alertId);
+      toast({
+        title: "Alerta en progreso",
+        description: "La alerta ha sido marcada como 'Trabajando'",
+      });
+    } else if (alert.status === 'working') {
+      resolveAlert(alertId);
+      
+      // Reset the pressed button state for the resolved alert
+      setPressedButtons(prev => ({ ...prev, [alert.type]: false }));
+      
+      toast({
+        title: "Alerta resuelta",
+        description: "La alerta ha sido marcada como resuelta",
+      });
+    }
+  };
+
   const getButtonColor = (button: any) => {
     if (button.name === 'Cancel') {
       return 'bg-yellow-500 hover:bg-yellow-600';
@@ -94,6 +122,60 @@ const PrensasDashboard: React.FC = () => {
     );
     
     return isPressed ? AlertTriangle : Play;
+  };
+
+  const getAlertStyles = (status: string) => {
+    switch (status) {
+      case 'active':
+        return {
+          bg: 'bg-red-50 border-red-200',
+          text: 'text-red-900',
+          subtext: 'text-red-600',
+          icon: 'text-red-600',
+          badge: 'bg-red-100 text-red-800',
+          statusText: 'ACTIVA'
+        };
+      case 'working':
+        return {
+          bg: 'bg-orange-50 border-orange-200',
+          text: 'text-orange-900',
+          subtext: 'text-orange-600',
+          icon: 'text-orange-600',
+          badge: 'bg-orange-100 text-orange-800',
+          statusText: 'TRABAJANDO'
+        };
+      default:
+        return {
+          bg: 'bg-gray-50 border-gray-200',
+          text: 'text-gray-900',
+          subtext: 'text-gray-600',
+          icon: 'text-gray-600',
+          badge: 'bg-gray-100 text-gray-800',
+          statusText: 'RESUELTA'
+        };
+    }
+  };
+
+  const getAlertIcon = (status: string) => {
+    switch (status) {
+      case 'active':
+        return AlertTriangle;
+      case 'working':
+        return Clock;
+      default:
+        return CheckCircle;
+    }
+  };
+
+  const getClickTitle = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'Haz clic para marcar como "Trabajando"';
+      case 'working':
+        return 'Haz clic para marcar como "Resuelta"';
+      default:
+        return 'Alerta resuelta';
+    }
   };
 
   return (
@@ -187,32 +269,42 @@ const PrensasDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Active Alerts */}
+      {/* Active Alerts with clickable states */}
       {activeAlerts.length > 0 && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold mb-4">Mis Alertas Activas</h3>
+          <h3 className="text-lg font-semibold mb-4">Mis Alertas Activas ({activeAlerts.length})</h3>
           <div className="space-y-2">
-            {activeAlerts.map(alert => (
-              <div key={alert.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  <div>
-                    <span className="font-medium text-red-900">{alert.type}</span>
-                    <span className="text-sm text-red-600 ml-2">
-                      {alert.timestamp.toLocaleTimeString()}
-                    </span>
-                    {alert.prensaName && (
-                      <span className="text-sm text-red-600 ml-2">
-                        • {alert.prensaName}
+            {activeAlerts.map(alert => {
+              const styles = getAlertStyles(alert.status);
+              const IconComponent = getAlertIcon(alert.status);
+              
+              return (
+                <div 
+                  key={alert.id} 
+                  className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${styles.bg}`}
+                  onClick={() => handleAlertClick(alert.id)}
+                  title={getClickTitle(alert.status)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <IconComponent className={`h-5 w-5 ${styles.icon}`} />
+                    <div>
+                      <span className={`font-medium ${styles.text}`}>{alert.type}</span>
+                      <span className={`text-sm ${styles.subtext} ml-2`}>
+                        {alert.timestamp.toLocaleTimeString()}
                       </span>
-                    )}
+                      {alert.prensaName && (
+                        <span className={`text-sm ${styles.subtext} ml-2`}>
+                          • {alert.prensaName}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles.badge}`}>
+                    {styles.statusText}
+                  </span>
                 </div>
-                <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                  Activa
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

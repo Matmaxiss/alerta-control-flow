@@ -10,7 +10,7 @@ import AlertButtons from './prensa/AlertButtons';
 import ActiveAlerts from './prensa/ActiveAlerts';
 
 const PrensaDashboard: React.FC = () => {
-  const { addAlert, alerts, cancelAlert, resolveAlert, prensas, alertButtons } = useData();
+  const { addAlert, alerts, cancelAlert, resolveAlert, setAlertWorking, prensas, alertButtons } = useData();
   const [selectedPrensa, setSelectedPrensa] = useState('');
   const [pressedButtons, setPressedButtons] = useState<{ [key: string]: boolean }>({});
   const navigate = useNavigate();
@@ -21,10 +21,10 @@ const PrensaDashboard: React.FC = () => {
   const selectedPress = prensas.find(p => p.id === selectedPrensa);
 
   const activeAlerts = alerts.filter(alert => {
-    const isActive = alert.status === 'active';
+    const isActiveOrWorking = alert.status === 'active' || alert.status === 'working';
     const matchesPrensa = alert.prensaId === selectedPrensa;
-    console.log(`Alert ${alert.id}: status=${alert.status}, prensaId=${alert.prensaId}, selectedPrensa=${selectedPrensa}, isActive=${isActive}, matchesPrensa=${matchesPrensa}`);
-    return isActive && matchesPrensa;
+    console.log(`Alert ${alert.id}: status=${alert.status}, prensaId=${alert.prensaId}, selectedPrensa=${selectedPrensa}, isActiveOrWorking=${isActiveOrWorking}, matchesPrensa=${matchesPrensa}`);
+    return isActiveOrWorking && matchesPrensa;
   });
 
   console.log('PrensaDashboard - activeAlerts after filter:', activeAlerts);
@@ -80,19 +80,29 @@ const PrensaDashboard: React.FC = () => {
     }
   };
 
-  const handleResolveAlert = (alertId: string) => {
-    resolveAlert(alertId);
-    
-    // Reset the pressed button state for the resolved alert
-    const resolvedAlert = alerts.find(alert => alert.id === alertId);
-    if (resolvedAlert) {
-      setPressedButtons(prev => ({ ...prev, [resolvedAlert.type]: false }));
-    }
+  const handleAlertClick = (alertId: string) => {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
 
-    toast({
-      title: "Alerta resuelta",
-      description: "La alerta ha sido marcada como resuelta",
-    });
+    console.log('Alert clicked:', alertId, 'Current status:', alert.status);
+    
+    if (alert.status === 'active') {
+      setAlertWorking(alertId);
+      toast({
+        title: "Alerta en progreso",
+        description: "La alerta ha sido marcada como 'Trabajando'",
+      });
+    } else if (alert.status === 'working') {
+      resolveAlert(alertId);
+      
+      // Reset the pressed button state for the resolved alert
+      setPressedButtons(prev => ({ ...prev, [alert.type]: false }));
+      
+      toast({
+        title: "Alerta resuelta",
+        description: "La alerta ha sido marcada como resuelta",
+      });
+    }
   };
 
   if (!selectedPrensa) {
@@ -138,7 +148,7 @@ const PrensaDashboard: React.FC = () => {
 
       <ActiveAlerts 
         alerts={activeAlerts} 
-        onResolveAlert={handleResolveAlert}
+        onAlertClick={handleAlertClick}
       />
     </div>
   );
