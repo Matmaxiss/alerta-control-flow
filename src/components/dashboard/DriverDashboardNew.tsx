@@ -19,11 +19,18 @@ const DriverDashboardNew: React.FC = () => {
   const assignedPrensas = prensas.filter(p => p.assignedToDriver === selectedDriver);
   const selectedDriverUser = users.find(u => u.id === selectedDriver);
 
-  // Only show active and working alerts for driver role
-  const activeDriverAlerts = alerts.filter(alert => 
-    (alert.status === 'active' || alert.status === 'working') && 
-    alert.userId === selectedDriver
-  );
+  // Get prensa IDs assigned to the selected driver
+  const assignedPrensaIds = assignedPrensas.map(p => p.id);
+  
+  // Filter alerts for prensas assigned to the driver (active and working status)
+  const activeDriverAlerts = alerts.filter(alert => {
+    const isActiveOrWorking = alert.status === 'active' || alert.status === 'working';
+    const isAssignedToPrensa = alert.prensaId && assignedPrensaIds.includes(alert.prensaId);
+    
+    console.log(`Alert ${alert.id}: status=${alert.status}, prensaId=${alert.prensaId}, isActiveOrWorking=${isActiveOrWorking}, isAssignedToPrensa=${isAssignedToPrensa}`);
+    
+    return isActiveOrWorking && isAssignedToPrensa;
+  });
 
   // Get alerts by prensa to determine cube colors
   const getPrensaAlerts = (prensaId: string) => {
@@ -125,6 +132,18 @@ const DriverDashboardNew: React.FC = () => {
     );
   }
 
+  const handleDriverConfirm = () => {
+    if (selectedShift && selectedDriver) {
+      setIsDriverSelected(true);
+    }
+  };
+
+  const handleBack = () => {
+    setIsDriverSelected(false);
+    setSelectedShift('');
+    setSelectedDriver('');
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       {/* Header compacto */}
@@ -144,6 +163,10 @@ const DriverDashboardNew: React.FC = () => {
               <div>
                 <span className="text-gray-500">Prensas:</span>
                 <span className="font-medium ml-1">{assignedPrensas.length}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Alertas:</span>
+                <span className="font-medium ml-1">{activeDriverAlerts.length}</span>
               </div>
             </div>
           </div>
