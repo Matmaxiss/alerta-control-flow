@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
@@ -23,14 +22,17 @@ const DriverDashboardNew: React.FC = () => {
   const assignedPrensaIds = assignedPrensas.map(p => p.id);
   
   // Filter alerts for prensas assigned to the driver (active and working status)
-  const activeDriverAlerts = alerts.filter(alert => {
-    const isActiveOrWorking = alert.status === 'active' || alert.status === 'working';
-    const isAssignedToPrensa = alert.prensaId && assignedPrensaIds.includes(alert.prensaId);
-    
-    console.log(`Alert ${alert.id}: status=${alert.status}, prensaId=${alert.prensaId}, isActiveOrWorking=${isActiveOrWorking}, isAssignedToPrensa=${isAssignedToPrensa}`);
-    
-    return isActiveOrWorking && isAssignedToPrensa;
-  });
+  // Sort by timestamp descending (most recent first)
+  const activeDriverAlerts = alerts
+    .filter(alert => {
+      const isActiveOrWorking = alert.status === 'active' || alert.status === 'working';
+      const isAssignedToPrensa = alert.prensaId && assignedPrensaIds.includes(alert.prensaId);
+      
+      console.log(`Alert ${alert.id}: status=${alert.status}, prensaId=${alert.prensaId}, isActiveOrWorking=${isActiveOrWorking}, isAssignedToPrensa=${isAssignedToPrensa}`);
+      
+      return isActiveOrWorking && isAssignedToPrensa;
+    })
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
   // Get alerts by prensa to determine cube colors
   const getPrensaAlerts = (prensaId: string) => {
