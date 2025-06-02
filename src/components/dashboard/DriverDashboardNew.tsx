@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { User, Truck, AlertTriangle, Grid3X3, List, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 const DriverDashboardNew: React.FC = () => {
   const { users } = useAuth();
@@ -46,8 +47,41 @@ const DriverDashboardNew: React.FC = () => {
     console.log('Alert clicked:', alert.id, 'Current status:', alert.status);
     if (alert.status === 'active') {
       setAlertWorking(alert.id);
+      toast({
+        title: "Alerta en progreso",
+        description: "La alerta ha sido marcada como 'Trabajando'",
+      });
     } else if (alert.status === 'working') {
       resolveAlert(alert.id);
+      toast({
+        title: "Alerta resuelta",
+        description: "La alerta ha sido marcada como resuelta",
+      });
+    }
+  };
+
+  const handlePrensaCubeClick = (prensaId: string) => {
+    const prensaAlerts = getPrensaAlerts(prensaId);
+    
+    if (prensaAlerts.length === 0) return;
+    
+    // Get the most recent alert for this prensa
+    const mostRecentAlert = prensaAlerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
+    
+    console.log('Prensa cube clicked:', prensaId, 'Most recent alert:', mostRecentAlert.id, 'Status:', mostRecentAlert.status);
+    
+    if (mostRecentAlert.status === 'active') {
+      setAlertWorking(mostRecentAlert.id);
+      toast({
+        title: "Alerta en progreso",
+        description: "La alerta ha sido marcada como 'Trabajando'",
+      });
+    } else if (mostRecentAlert.status === 'working') {
+      resolveAlert(mostRecentAlert.id);
+      toast({
+        title: "Alerta resuelta",
+        description: "La alerta ha sido marcada como resuelta",
+      });
     }
   };
 
@@ -304,12 +338,14 @@ const DriverDashboardNew: React.FC = () => {
                 const prensaAlerts = getPrensaAlerts(prensa.id);
                 const hasActiveAlerts = prensaAlerts.some(alert => alert.status === 'active');
                 const hasWorkingAlerts = prensaAlerts.some(alert => alert.status === 'working');
+                const hasClickableAlerts = prensaAlerts.length > 0;
                 
                 let bgColor = 'bg-green-50 border-green-200 hover:border-green-300';
                 let iconColor = 'bg-green-500';
                 let textColor = 'text-green-800';
                 let subtextColor = 'text-green-600';
                 let statusText = 'Sin alertas';
+                let clickTitle = '';
                 
                 if (hasActiveAlerts) {
                   bgColor = 'bg-red-50 border-red-200 hover:border-red-300';
@@ -317,18 +353,24 @@ const DriverDashboardNew: React.FC = () => {
                   textColor = 'text-red-800';
                   subtextColor = 'text-red-600';
                   statusText = `${prensaAlerts.filter(a => a.status === 'active').length} alerta(s)`;
+                  clickTitle = 'Haz clic para marcar como "Trabajando"';
                 } else if (hasWorkingAlerts) {
                   bgColor = 'bg-orange-50 border-orange-200 hover:border-orange-300';
                   iconColor = 'bg-orange-500';
                   textColor = 'text-orange-800';
                   subtextColor = 'text-orange-600';
                   statusText = 'Trabajando';
+                  clickTitle = 'Haz clic para marcar como "Resuelta"';
                 }
                 
                 return (
                   <div
                     key={prensa.id}
-                    className={`relative p-6 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:shadow-md ${bgColor}`}
+                    className={`relative p-6 rounded-lg border-2 transition-all duration-200 ${
+                      hasClickableAlerts ? 'cursor-pointer hover:shadow-md' : ''
+                    } ${bgColor}`}
+                    onClick={hasClickableAlerts ? () => handlePrensaCubeClick(prensa.id) : undefined}
+                    title={clickTitle}
                   >
                     <div className="text-center">
                       <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${iconColor}`}>
