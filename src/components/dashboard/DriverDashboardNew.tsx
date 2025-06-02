@@ -132,18 +132,6 @@ const DriverDashboardNew: React.FC = () => {
     );
   }
 
-  const handleDriverConfirm = () => {
-    if (selectedShift && selectedDriver) {
-      setIsDriverSelected(true);
-    }
-  };
-
-  const handleBack = () => {
-    setIsDriverSelected(false);
-    setSelectedShift('');
-    setSelectedDriver('');
-  };
-
   return (
     <div className="min-h-screen bg-background p-4">
       {/* Header compacto */}
