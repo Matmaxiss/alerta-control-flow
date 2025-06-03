@@ -1,0 +1,100 @@
+
+_format_version: "2.1"
+
+services:
+  - name: auth-v1-open
+    url: http://supabase-auth:9999/verify
+    plugins:
+      - name: cors
+  - name: auth-v1-open-callback
+    url: http://supabase-auth:9999/callback
+    plugins:
+      - name: cors
+  - name: auth-v1-open-authorize
+    url: http://supabase-auth:9999/authorize
+    plugins:
+      - name: cors
+
+  - name: rest-v1
+    _comment: "PostgREST: /rest/v1/* -> http://supabase-rest:3000/*"
+    url: http://supabase-rest:3000/
+    plugins:
+      - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: false
+      - name: acl
+        config:
+          hide_groups_header: true
+          allow:
+            - anon
+            - authenticated
+
+  - name: realtime-v1
+    _comment: "Realtime: /realtime/v1/* -> ws://supabase-realtime:4000/socket/*"
+    url: http://supabase-realtime:4000/socket/
+    plugins:
+      - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: false
+      - name: acl
+        config:
+          hide_groups_header: true
+          allow:
+            - anon
+            - authenticated
+
+routes:
+  - service: auth-v1-open
+    match:
+      methods:
+        - GET
+        - POST
+      paths:
+        - ~/auth/v1/verify$
+  - service: auth-v1-open-callback
+    match:
+      methods:
+        - GET
+        - POST
+      paths:
+        - ~/auth/v1/callback$
+  - service: auth-v1-open-authorize
+    match:
+      methods:
+        - GET
+        - POST
+      paths:
+        - ~/auth/v1/authorize$
+
+  - service: rest-v1
+    match:
+      paths:
+        - ~/rest/v1/(.*)$
+    plugins:
+      - name: request-transformer
+        config:
+          strip_path: true
+
+  - service: realtime-v1
+    match:
+      paths:
+        - ~/realtime/v1/(.*)$
+    plugins:
+      - name: request-transformer
+        config:
+          strip_path: true
+
+consumers:
+  - username: anon
+    keyauth_credentials:
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+    acls:
+      - group: anon
+  - username: authenticated
+    keyauth_credentials:
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJleHAiOjE5ODM4MTI5OTZ9.5AUhVm0lL-aMWO6fTI22Dt6KVYYQAg_UzZa4BlBNVnE
+    acls:
+      - group: authenticated
+
