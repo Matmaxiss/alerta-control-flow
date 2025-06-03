@@ -1,0 +1,10 @@
+
+version: '3.8'
+
+services:
+  alerta-control-flow:
+    build: .
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    container_name: alerta-control-flow-app
