@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { Users, Settings, Activity, Plus } from 'lucide-react';
+import { Users, Settings, Activity, Plus, BarChart3 } from 'lucide-react';
 import UserManagement from '../admin/UserManagement';
 import PrensaManagement from '../admin/PrensaManagement';
 import ButtonManagement from '../admin/ButtonManagement';
 import AlertsView from '../common/AlertsView';
+import ReportsView from '../admin/ReportsView';
 import { useAuth } from '../../contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
@@ -16,6 +17,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'users', label: 'Users', icon: Users },
     { id: 'presses', label: 'Presses', icon: Settings },
     { id: 'buttons', label: 'Botones', icon: Plus },
+    { id: 'reports', label: 'Reportes', icon: BarChart3 },
   ];
 
   return (
@@ -64,6 +66,7 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'users' && <UserManagement />}
         {activeTab === 'presses' && <PrensaManagement />}
         {activeTab === 'buttons' && <ButtonManagement />}
+        {activeTab === 'reports' && <ReportsView />}
       </div>
     </div>
   );
