@@ -4,7 +4,7 @@ import { useData } from '../../contexts/DataContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Badge } from '../ui/badge';
-import { Calendar, Clock, TrendingUp, TrendingDown } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, TrendingDown, Activity, Settings } from 'lucide-react';
 import { 
   BarChart, 
   Bar, 
