@@ -16,7 +16,6 @@ services:
       - name: cors
 
   - name: rest-v1
-    _comment: "PostgREST: /rest/v1/* -> http://supabase-rest:3000/*"
     url: http://supabase-rest:3000/
     plugins:
       - name: cors
@@ -31,7 +30,6 @@ services:
             - authenticated
 
   - name: realtime-v1
-    _comment: "Realtime: /realtime/v1/* -> ws://supabase-realtime:4000/socket/*"
     url: http://supabase-realtime:4000/socket/
     plugins:
       - name: cors
@@ -46,45 +44,41 @@ services:
             - authenticated
 
 routes:
-  - service: auth-v1-open
-    match:
-      methods:
-        - GET
-        - POST
-      paths:
-        - ~/auth/v1/verify$
-  - service: auth-v1-open-callback
-    match:
-      methods:
-        - GET
-        - POST
-      paths:
-        - ~/auth/v1/callback$
-  - service: auth-v1-open-authorize
-    match:
-      methods:
-        - GET
-        - POST
-      paths:
-        - ~/auth/v1/authorize$
+  - name: auth-verify
+    service: auth-v1-open
+    methods:
+      - GET
+      - POST
+    paths:
+      - /auth/v1/verify
 
-  - service: rest-v1
-    match:
-      paths:
-        - ~/rest/v1/(.*)$
-    plugins:
-      - name: request-transformer
-        config:
-          strip_path: true
+  - name: auth-callback
+    service: auth-v1-open-callback
+    methods:
+      - GET
+      - POST
+    paths:
+      - /auth/v1/callback
 
-  - service: realtime-v1
-    match:
-      paths:
-        - ~/realtime/v1/(.*)$
-    plugins:
-      - name: request-transformer
-        config:
-          strip_path: true
+  - name: auth-authorize
+    service: auth-v1-open-authorize
+    methods:
+      - GET
+      - POST
+    paths:
+      - /auth/v1/authorize
+
+  - name: rest-api
+    service: rest-v1
+    paths:
+      - /rest/v1/
+    strip_path: true
+
+  - name: realtime-api
+    service: realtime-v1
+    paths:
+      - /realtime/v1/
+    strip_path: true
 
 consumers:
   - username: anon
@@ -97,4 +91,3 @@ consumers:
       - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJleHAiOjE5ODM4MTI5OTZ9.5AUhVm0lL-aMWO6fTI22Dt6KVYYQAg_UzZa4BlBNVnE
     acls:
       - group: authenticated
-
