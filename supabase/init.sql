@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     active BOOLEAN DEFAULT true,
     requires_password BOOLEAN DEFAULT false,
+    password_hash TEXT,
     prensa_id UUID
 );
 
@@ -89,9 +90,22 @@ CREATE TABLE IF NOT EXISTS alert_buttons (
 );
 
 -- Insertar datos iniciales
-INSERT INTO users (id, username, role, shift, requires_password) VALUES 
-('00000000-0000-0000-0000-000000000001', 'admin', 'admin', '1 shift', true)
-ON CONFLICT (username) DO NOTHING;
+-- Crear usuario admin con contraseña encriptada (12345678)
+INSERT INTO users (id, username, role, shift, requires_password, password_hash, active) VALUES 
+('00000000-0000-0000-0000-000000000001', 'admin', 'admin', '1 shift', true, crypt('12345678', gen_salt('bf')), true)
+ON CONFLICT (id) DO UPDATE SET 
+    password_hash = crypt('12345678', gen_salt('bf')),
+    active = true,
+    requires_password = true;
+
+-- Verificar que el usuario admin existe
+INSERT INTO users (id, username, role, shift, requires_password, password_hash, active) VALUES 
+('00000000-0000-0000-0000-000000000001', 'admin', 'admin', '1 shift', true, crypt('12345678', gen_salt('bf')), true)
+ON CONFLICT (username) DO UPDATE SET 
+    password_hash = crypt('12345678', gen_salt('bf')),
+    active = true,
+    requires_password = true,
+    role = 'admin';
 
 INSERT INTO prensas (id, name, status, shift) VALUES 
 ('10000000-0000-0000-0000-000000000001', 'Press 1', 'active', '1 shift'),
@@ -117,6 +131,12 @@ ALTER TABLE prensa_blocks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE alert_buttons ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de seguridad (por ahora permisivas para desarrollo)
+DROP POLICY IF EXISTS "Allow all operations" ON users;
+DROP POLICY IF EXISTS "Allow all operations" ON prensas;
+DROP POLICY IF EXISTS "Allow all operations" ON alerts;
+DROP POLICY IF EXISTS "Allow all operations" ON prensa_blocks;
+DROP POLICY IF EXISTS "Allow all operations" ON alert_buttons;
+
 CREATE POLICY "Allow all operations" ON users FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON prensas FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON alerts FOR ALL USING (true);
@@ -129,3 +149,12 @@ GRANT ALL ON ALL TABLES IN SCHEMA realtime TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA realtime TO anon, authenticated;
 GRANT ALL ON ALL FUNCTIONS IN SCHEMA realtime TO anon, authenticated;
 
+-- Mostrar información del usuario admin creado
+DO $$
+BEGIN
+    RAISE NOTICE 'Usuario admin creado exitosamente:';
+    RAISE NOTICE 'Username: admin';
+    RAISE NOTICE 'Password: 12345678';
+    RAISE NOTICE 'Role: admin';
+END
+$$;

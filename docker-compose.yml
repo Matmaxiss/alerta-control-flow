@@ -78,6 +78,24 @@ services:
         /app/bin/server
       "
 
+  # Supabase Studio para administración web
+  supabase-studio:
+    image: supabase/studio:20240326-5e5586d
+    restart: unless-stopped
+    container_name: supabase-studio
+    environment:
+      SUPABASE_URL: http://supabase-kong:8000
+      SUPABASE_REST_URL: http://localhost:8000/rest/v1/
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+      STUDIO_PG_META_URL: http://localhost:8000/pg
+      POSTGRES_PASSWORD: your-super-secret-and-long-postgres-password
+    ports:
+      - "3002:3000"
+    depends_on:
+      - supabase-kong
+      - supabase-db
+
   # Kong Gateway (API Gateway)
   supabase-kong:
     image: kong:2.8.1
@@ -101,4 +119,3 @@ services:
 
 volumes:
   supabase-db-data:
-
