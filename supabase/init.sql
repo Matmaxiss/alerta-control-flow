@@ -38,6 +38,21 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated;
 GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO postgres, anon, authenticated;
 
+-- Configurar esquema _realtime para Realtime
+GRANT ALL ON SCHEMA _realtime TO supabase_realtime_admin;
+GRANT ALL ON SCHEMA realtime TO supabase_realtime_admin;
+GRANT USAGE ON SCHEMA _realtime TO supabase_realtime_admin;
+GRANT USAGE ON SCHEMA realtime TO supabase_realtime_admin;
+
+-- Crear tablas básicas para Realtime en el esquema _realtime
+CREATE TABLE IF NOT EXISTS _realtime.schema_migrations (
+    version BIGINT PRIMARY KEY,
+    inserted_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Configurar search_path para el usuario de Realtime
+ALTER USER supabase_realtime_admin SET search_path TO _realtime, public;
+
 -- Crear tablas para la aplicación de alertas
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -93,14 +108,6 @@ CREATE TABLE IF NOT EXISTS alert_buttons (
 -- Crear usuario admin con contraseña encriptada (12345678)
 INSERT INTO users (id, username, role, shift, requires_password, password_hash, active) VALUES 
 ('00000000-0000-0000-0000-000000000001', 'admin', 'admin', '1 shift', true, crypt('12345678', gen_salt('bf')), true)
-ON CONFLICT (id) DO UPDATE SET 
-    password_hash = crypt('12345678', gen_salt('bf')),
-    active = true,
-    requires_password = true;
-
--- Verificar que el usuario admin existe
-INSERT INTO users (id, username, role, shift, requires_password, password_hash, active) VALUES 
-('00000000-0000-0000-0000-000000000001', 'admin', 'admin', '1 shift', true, crypt('12345678', gen_salt('bf')), true)
 ON CONFLICT (username) DO UPDATE SET 
     password_hash = crypt('12345678', gen_salt('bf')),
     active = true,
@@ -148,6 +155,11 @@ GRANT USAGE ON SCHEMA realtime TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA realtime TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA realtime TO anon, authenticated;
 GRANT ALL ON ALL FUNCTIONS IN SCHEMA realtime TO anon, authenticated;
+
+-- Configurar permisos adicionales para _realtime
+GRANT ALL ON ALL TABLES IN SCHEMA _realtime TO supabase_realtime_admin;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA _realtime TO supabase_realtime_admin;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA _realtime TO supabase_realtime_admin;
 
 -- Mostrar información del usuario admin creado
 DO $$
