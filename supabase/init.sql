@@ -130,6 +130,13 @@ INSERT INTO alert_buttons (id, name, color, allowed_roles) VALUES
 ('20000000-0000-0000-0000-000000000006', 'Cancel', '#eab308', '{admin,supervisor,press,driver}')
 ON CONFLICT (id) DO NOTHING;
 
+-- Otorgar permisos específicos para las tablas después de crearlas
+GRANT ALL ON users TO postgres, anon, authenticated;
+GRANT ALL ON prensas TO postgres, anon, authenticated;
+GRANT ALL ON alerts TO postgres, anon, authenticated;
+GRANT ALL ON prensa_blocks TO postgres, anon, authenticated;
+GRANT ALL ON alert_buttons TO postgres, anon, authenticated;
+
 -- Habilitar Row Level Security
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prensas ENABLE ROW LEVEL SECURITY;
@@ -137,18 +144,19 @@ ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prensa_blocks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE alert_buttons ENABLE ROW LEVEL SECURITY;
 
--- Políticas de seguridad (por ahora permisivas para desarrollo)
+-- Políticas de seguridad más permisivas para desarrollo
 DROP POLICY IF EXISTS "Allow all operations" ON users;
 DROP POLICY IF EXISTS "Allow all operations" ON prensas;
 DROP POLICY IF EXISTS "Allow all operations" ON alerts;
 DROP POLICY IF EXISTS "Allow all operations" ON prensa_blocks;
 DROP POLICY IF EXISTS "Allow all operations" ON alert_buttons;
 
-CREATE POLICY "Allow all operations" ON users FOR ALL USING (true);
-CREATE POLICY "Allow all operations" ON prensas FOR ALL USING (true);
-CREATE POLICY "Allow all operations" ON alerts FOR ALL USING (true);
-CREATE POLICY "Allow all operations" ON prensa_blocks FOR ALL USING (true);
-CREATE POLICY "Allow all operations" ON alert_buttons FOR ALL USING (true);
+-- Crear políticas que permiten acceso tanto a anon como authenticated
+CREATE POLICY "Allow all operations" ON users FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all operations" ON prensas FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all operations" ON alerts FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all operations" ON prensa_blocks FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all operations" ON alert_buttons FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
 -- Configurar realtime
 GRANT USAGE ON SCHEMA realtime TO anon, authenticated;
