@@ -19,6 +19,31 @@ services:
     url: http://supabase-rest:3000/
     plugins:
       - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+            - X-Client-Info
+            - apikey
+          exposed_headers:
+            - "*"
+          credentials: true
+          max_age: 3600
       - name: key-auth
         config:
           hide_credentials: false
@@ -33,6 +58,31 @@ services:
     url: http://supabase-realtime:4000/socket/
     plugins:
       - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+            - X-Client-Info
+            - apikey
+          exposed_headers:
+            - "*"
+          credentials: true
+          max_age: 3600
       - name: key-auth
         config:
           hide_credentials: false
@@ -70,12 +120,26 @@ routes:
 
   - name: rest-api
     service: rest-v1
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
     paths:
       - /rest/v1/
     strip_path: true
 
   - name: realtime-api
     service: realtime-v1
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
     paths:
       - /realtime/v1/
     strip_path: true
@@ -88,6 +152,6 @@ consumers:
       - group: anon
   - username: authenticated
     keyauth_credentials:
-      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJleHAiOjE5ODM4MTI5OTZ9.5AUhVm0lL-aMWO6fTI22Dt6KVYYQAg_UzZa4BlBNVnE
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJleHAiOjE5ODM4MTI5OTZ5.5AUhVm0lL-aMWO6fTI22Dt6KVYYQAg_UzZa4BlBNVnE
     acls:
       - group: authenticated
