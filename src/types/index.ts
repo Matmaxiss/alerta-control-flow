@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   username: string;
@@ -12,13 +11,13 @@ export interface User {
 
 export interface Alert {
   id: string;
-  type: string; // Changed from specific types to string to allow custom button names
+  type: 'Driver' | 'Technical' | 'Supervisor' | 'Cancel';
   prensaId?: string;
   prensaName?: string;
   userId: string;
   username: string;
   timestamp: Date;
-  status: 'active' | 'working' | 'cancelled' | 'resolved';
+  status: 'active' | 'cancelled';
   shift: string;
 }
 

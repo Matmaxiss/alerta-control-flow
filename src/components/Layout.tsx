@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, User, Settings, Bell, Home } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { LogOut, User, Settings, Bell } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,7 +9,6 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,14 +24,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/')}
-                className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Home className="h-4 w-4" />
-                <span className="text-sm">Panel Principal</span>
-              </button>
-              
               <div className="flex items-center space-x-2">
                 <User className="h-5 w-5 text-muted-foreground" />
                 <span className="text-sm font-medium text-foreground">

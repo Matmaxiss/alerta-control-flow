@@ -3,15 +3,12 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, users, requiresPassword } = useAuth();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,24 +40,6 @@ const LoginForm: React.FC = () => {
         title: "Success",
         description: "Login successful",
       });
-      
-      // Redirect to the appropriate panel after successful login
-      const panel = searchParams.get('panel');
-      if (panel) {
-        navigate(`/${panel}`);
-      } else {
-        // Default redirect based on user role
-        switch (user.role) {
-          case 'admin':
-            navigate('/admin');
-            break;
-          case 'supervisor':
-            navigate('/supervisor');
-            break;
-          default:
-            navigate('/');
-        }
-      }
     } else {
       toast({
         title: "Error",

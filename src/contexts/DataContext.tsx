@@ -2,14 +2,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Alert, Prensa, PrensaBlock } from '../types';
 import { useAuth } from './AuthContext';
-import { supabase } from '../lib/supabase';
 
 interface AlertButton {
   id: string;
   name: string;
   image?: string;
   color: string;
-  allowedRoles: string[];
 }
 
 interface DataContextType {
@@ -19,8 +17,6 @@ interface DataContextType {
   alertButtons: AlertButton[];
   addAlert: (alert: Omit<Alert, 'id' | 'timestamp'>) => void;
   cancelAlert: (id: string) => void;
-  resolveAlert: (id: string) => void;
-  setAlertWorking: (id: string) => void;
   addPrensa: (prensa: Omit<Prensa, 'id'>) => void;
   updatePrensa: (id: string, updates: Partial<Prensa>) => void;
   deletePrensa: (id: string) => void;
@@ -44,331 +40,116 @@ export const useData = () => {
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [prensas, setPrensas] = useState<Prensa[]>([]);
+  const [prensas, setPrensas] = useState<Prensa[]>([
+    { id: '1', name: 'Press 1', status: 'active', shift: '1 shift' },
+    { id: '2', name: 'Press 2', status: 'active', shift: '1 shift' },
+    { id: '3', name: 'Press 3', status: 'active', shift: '2 shift' },
+    { id: '4', name: 'Press 4', status: 'active', shift: '2 shift' },
+  ]);
   const [prensaBlocks, setPrensaBlocks] = useState<PrensaBlock[]>([]);
-  const [alertButtons, setAlertButtons] = useState<AlertButton[]>([]);
+  const [alertButtons, setAlertButtons] = useState<AlertButton[]>([
+    { id: '1', name: 'Mechanical', color: '#ef4444' },
+    { id: '2', name: 'Electrical', color: '#f97316' },
+    { id: '3', name: 'Quality', color: '#eab308' },
+    { id: '4', name: 'Material', color: '#22c55e' },
+    { id: '5', name: 'Other', color: '#6366f1' },
+    { id: '6', name: 'Cancel', color: '#eab308' },
+  ]);
 
-  // Cargar datos iniciales
   useEffect(() => {
-    loadAlerts();
-    loadPrensas();
-    loadPrensaBlocks();
-    loadAlertButtons();
-  }, []);
-
-  // Configurar subscripciones en tiempo real
-  useEffect(() => {
-    console.log('Configurando subscripciones en tiempo real...');
+    const savedAlerts = localStorage.getItem('alerts');
+    const savedPrensas = localStorage.getItem('prensas');
+    const savedBlocks = localStorage.getItem('prensaBlocks');
+    const savedButtons = localStorage.getItem('alertButtons');
     
-    // Subscripción para alertas
-    const alertsSubscription = supabase
-      .channel('alerts-channel')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'alerts' },
-        (payload) => {
-          console.log('Alert realtime update:', payload);
-          loadAlerts(); // Recargar alertas cuando hay cambios
-        }
-      )
-      .subscribe();
-
-    // Subscripción para prensas
-    const prensasSubscription = supabase
-      .channel('prensas-channel')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'prensas' },
-        (payload) => {
-          console.log('Prensa realtime update:', payload);
-          loadPrensas();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      console.log('Limpiando subscripciones...');
-      supabase.removeChannel(alertsSubscription);
-      supabase.removeChannel(prensasSubscription);
-    };
-  }, []);
-
-  const loadAlerts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('alerts')
-        .select('*')
-        .order('timestamp', { ascending: false });
-      
-      if (error) {
-        console.error('Error loading alerts:', error);
-        return;
-      }
-
-      const alertsWithDates = data.map((alert: any) => ({
+    if (savedAlerts) {
+      const parsedAlerts = JSON.parse(savedAlerts);
+      // Convert timestamp strings back to Date objects
+      const alertsWithDates = parsedAlerts.map((alert: any) => ({
         ...alert,
         timestamp: new Date(alert.timestamp)
       }));
-      
       setAlerts(alertsWithDates);
-    } catch (error) {
-      console.error('Error loading alerts:', error);
     }
+    if (savedPrensas) setPrensas(JSON.parse(savedPrensas));
+    if (savedBlocks) setPrensaBlocks(JSON.parse(savedBlocks));
+    if (savedButtons) setAlertButtons(JSON.parse(savedButtons));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('alerts', JSON.stringify(alerts));
+    localStorage.setItem('prensas', JSON.stringify(prensas));
+    localStorage.setItem('prensaBlocks', JSON.stringify(prensaBlocks));
+    localStorage.setItem('alertButtons', JSON.stringify(alertButtons));
+  }, [alerts, prensas, prensaBlocks, alertButtons]);
+
+  const addAlert = (alertData: Omit<Alert, 'id' | 'timestamp'>) => {
+    const newAlert: Alert = {
+      ...alertData,
+      id: Date.now().toString(),
+      timestamp: new Date(),
+    };
+    setAlerts(prev => [newAlert, ...prev]);
   };
 
-  const loadPrensas = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('prensas')
-        .select('*');
-      
-      if (error) {
-        console.error('Error loading prensas:', error);
-        return;
-      }
-      
-      setPrensas(data || []);
-    } catch (error) {
-      console.error('Error loading prensas:', error);
-    }
+  const cancelAlert = (id: string) => {
+    setAlerts(prev => prev.map(alert => 
+      alert.id === id ? { ...alert, status: 'cancelled' as const } : alert
+    ));
   };
 
-  const loadPrensaBlocks = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('prensa_blocks')
-        .select('*');
-      
-      if (error) {
-        console.error('Error loading prensa blocks:', error);
-        return;
-      }
-      
-      setPrensaBlocks(data || []);
-    } catch (error) {
-      console.error('Error loading prensa blocks:', error);
-    }
+  const addPrensa = (prensaData: Omit<Prensa, 'id'>) => {
+    const newPrensa: Prensa = {
+      ...prensaData,
+      id: Date.now().toString(),
+    };
+    setPrensas(prev => [...prev, newPrensa]);
   };
 
-  const loadAlertButtons = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('alert_buttons')
-        .select('*');
-      
-      if (error) {
-        console.error('Error loading alert buttons:', error);
-        return;
-      }
-      
-      setAlertButtons(data || []);
-    } catch (error) {
-      console.error('Error loading alert buttons:', error);
-    }
+  const updatePrensa = (id: string, updates: Partial<Prensa>) => {
+    setPrensas(prev => prev.map(prensa => 
+      prensa.id === id ? { ...prensa, ...updates } : prensa
+    ));
   };
 
-  const addAlert = async (alertData: Omit<Alert, 'id' | 'timestamp'>) => {
-    try {
-      const { error } = await supabase
-        .from('alerts')
-        .insert([alertData]);
-      
-      if (error) {
-        console.error('Error adding alert:', error);
-        return;
-      }
-      
-      // Los datos se actualizarán automáticamente por la subscripción en tiempo real
-    } catch (error) {
-      console.error('Error adding alert:', error);
-    }
+  const deletePrensa = (id: string) => {
+    setPrensas(prev => prev.filter(prensa => prensa.id !== id));
   };
 
-  const cancelAlert = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('alerts')
-        .update({ status: 'cancelled' })
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error cancelling alert:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error cancelling alert:', error);
-    }
+  const addPrensaBlock = (blockData: Omit<PrensaBlock, 'id'>) => {
+    const newBlock: PrensaBlock = {
+      ...blockData,
+      id: Date.now().toString(),
+    };
+    setPrensaBlocks(prev => [...prev, newBlock]);
   };
 
-  const resolveAlert = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('alerts')
-        .update({ status: 'resolved' })
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error resolving alert:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error resolving alert:', error);
-    }
+  const updatePrensaBlock = (id: string, updates: Partial<PrensaBlock>) => {
+    setPrensaBlocks(prev => prev.map(block => 
+      block.id === id ? { ...block, ...updates } : block
+    ));
   };
 
-  const setAlertWorking = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('alerts')
-        .update({ status: 'working' })
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error setting alert working:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error setting alert working:', error);
-    }
+  const deletePrensaBlock = (id: string) => {
+    setPrensaBlocks(prev => prev.filter(block => block.id !== id));
   };
 
-  const addPrensa = async (prensaData: Omit<Prensa, 'id'>) => {
-    try {
-      const { error } = await supabase
-        .from('prensas')
-        .insert([prensaData]);
-      
-      if (error) {
-        console.error('Error adding prensa:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error adding prensa:', error);
-    }
+  const addAlertButton = (buttonData: Omit<AlertButton, 'id'>) => {
+    const newButton: AlertButton = {
+      ...buttonData,
+      id: Date.now().toString(),
+    };
+    setAlertButtons(prev => [...prev, newButton]);
   };
 
-  const updatePrensa = async (id: string, updates: Partial<Prensa>) => {
-    try {
-      const { error } = await supabase
-        .from('prensas')
-        .update(updates)
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error updating prensa:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error updating prensa:', error);
-    }
+  const updateAlertButton = (id: string, updates: Partial<AlertButton>) => {
+    setAlertButtons(prev => prev.map(button => 
+      button.id === id ? { ...button, ...updates } : button
+    ));
   };
 
-  const deletePrensa = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('prensas')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error deleting prensa:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error deleting prensa:', error);
-    }
-  };
-
-  const addPrensaBlock = async (blockData: Omit<PrensaBlock, 'id'>) => {
-    try {
-      const { error } = await supabase
-        .from('prensa_blocks')
-        .insert([blockData]);
-      
-      if (error) {
-        console.error('Error adding prensa block:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error adding prensa block:', error);
-    }
-  };
-
-  const updatePrensaBlock = async (id: string, updates: Partial<PrensaBlock>) => {
-    try {
-      const { error } = await supabase
-        .from('prensa_blocks')
-        .update(updates)
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error updating prensa block:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error updating prensa block:', error);
-    }
-  };
-
-  const deletePrensaBlock = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('prensa_blocks')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error deleting prensa block:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error deleting prensa block:', error);
-    }
-  };
-
-  const addAlertButton = async (buttonData: Omit<AlertButton, 'id'>) => {
-    try {
-      const { error } = await supabase
-        .from('alert_buttons')
-        .insert([buttonData]);
-      
-      if (error) {
-        console.error('Error adding alert button:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error adding alert button:', error);
-    }
-  };
-
-  const updateAlertButton = async (id: string, updates: Partial<AlertButton>) => {
-    try {
-      const { error } = await supabase
-        .from('alert_buttons')
-        .update(updates)
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error updating alert button:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error updating alert button:', error);
-    }
-  };
-
-  const deleteAlertButton = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('alert_buttons')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error deleting alert button:', error);
-        return;
-      }
-    } catch (error) {
-      console.error('Error deleting alert button:', error);
-    }
+  const deleteAlertButton = (id: string) => {
+    setAlertButtons(prev => prev.filter(button => button.id !== id));
   };
 
   return (
@@ -379,8 +160,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       alertButtons,
       addAlert,
       cancelAlert,
-      resolveAlert,
-      setAlertWorking,
       addPrensa,
       updatePrensa,
       deletePrensa,
@@ -395,4 +174,3 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </DataContext.Provider>
   );
 };
-

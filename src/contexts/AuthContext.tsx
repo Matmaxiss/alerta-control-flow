@@ -1,10 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, AuthState } from '../types';
-import { supabase } from '../lib/supabase';
 
 interface AuthContextType extends AuthState {
-  login: (username: string, password?: string) => Promise<boolean>;
+  login: (username: string, password?: string) => boolean;
   logout: () => void;
   users: User[];
   addUser: (user: Omit<User, 'id' | 'createdAt'>) => void;
@@ -30,21 +29,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     requiresPassword: false,
   });
 
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([
+    {
+      id: '1',
+      username: 'admin',
+      role: 'admin',
+      shift: '1 shift',
+      createdAt: new Date(),
+      active: true,
+      requiresPassword: true,
+    },
+  ]);
 
   useEffect(() => {
-    loadUsers();
-    
-    // Cargar estado de autenticación desde localStorage
     const savedAuth = localStorage.getItem('auth');
+    const savedUsers = localStorage.getItem('users');
     const savedPasswordReq = localStorage.getItem('requiresPassword');
     
     if (savedAuth) {
       const parsedAuth = JSON.parse(savedAuth);
+      // Convert user's createdAt back to Date if it exists
       if (parsedAuth.user && parsedAuth.user.createdAt) {
         parsedAuth.user.createdAt = new Date(parsedAuth.user.createdAt);
       }
       setAuthState(parsedAuth);
+    }
+    if (savedUsers) {
+      const parsedUsers = JSON.parse(savedUsers);
+      // Convert all users' createdAt back to Date objects
+      const usersWithDates = parsedUsers.map((user: any) => ({
+        ...user,
+        createdAt: new Date(user.createdAt)
+      }));
+      setUsers(usersWithDates);
     }
     if (savedPasswordReq) {
       setAuthState(prev => ({ ...prev, requiresPassword: JSON.parse(savedPasswordReq) }));
@@ -53,41 +70,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     localStorage.setItem('auth', JSON.stringify(authState));
+    localStorage.setItem('users', JSON.stringify(users));
     localStorage.setItem('requiresPassword', JSON.stringify(authState.requiresPassword));
-  }, [authState]);
+  }, [authState, users]);
 
-  const loadUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error loading users:', error);
-        return;
-      }
-
-      const usersWithDates = data.map((user: any) => ({
-        ...user,
-        createdAt: new Date(user.created_at)
-      }));
-      
-      setUsers(usersWithDates);
-    } catch (error) {
-      console.error('Error loading users:', error);
-    }
-  };
-
-  const login = async (username: string, password?: string): Promise<boolean> => {
+  const login = (username: string, password?: string): boolean => {
     const user = users.find(u => u.username === username && u.active);
     
     if (!user) return false;
 
-    // Admin siempre requiere contraseña
+    // Admin always requires password
     if (user.role === 'admin') {
       if (password !== '12345678') return false;
     } else if (authState.requiresPassword && user.requiresPassword) {
+      // Future: other users might require password
       if (!password) return false;
     }
 
@@ -107,60 +103,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
-  const addUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
-    try {
-      const { error } = await supabase
-        .from('users')
-        .insert([{
-          ...userData,
-          created_at: new Date().toISOString()
-        }]);
-      
-      if (error) {
-        console.error('Error adding user:', error);
-        return;
-      }
-      
-      loadUsers(); // Recargar usuarios
-    } catch (error) {
-      console.error('Error adding user:', error);
-    }
+  const addUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
+    const newUser: User = {
+      ...userData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+    };
+    setUsers(prev => [...prev, newUser]);
   };
 
-  const updateUser = async (id: string, updates: Partial<User>) => {
-    try {
-      const { error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error updating user:', error);
-        return;
-      }
-      
-      loadUsers(); // Recargar usuarios
-    } catch (error) {
-      console.error('Error updating user:', error);
-    }
+  const updateUser = (id: string, updates: Partial<User>) => {
+    setUsers(prev => prev.map(user => 
+      user.id === id ? { ...user, ...updates } : user
+    ));
   };
 
-  const deleteUser = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error deleting user:', error);
-        return;
-      }
-      
-      loadUsers(); // Recargar usuarios
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
+  const deleteUser = (id: string) => {
+    setUsers(prev => prev.filter(user => user.id !== id));
   };
 
   const togglePasswordRequirement = () => {
@@ -185,4 +144,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
-
